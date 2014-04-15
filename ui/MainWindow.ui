@@ -447,6 +447,9 @@
              <property name="checked">
               <bool>true</bool>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -454,6 +457,9 @@
              <property name="text">
               <string>0.1 mm</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -461,6 +467,9 @@
              <property name="text">
               <string>1 mm</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -468,6 +477,9 @@
              <property name="text">
               <string>10 mm</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -475,6 +487,9 @@
              <property name="text">
               <string>100 mm</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -505,6 +520,9 @@
              <property name="checked">
               <bool>true</bool>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveSpeedGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -512,6 +530,9 @@
              <property name="text">
               <string>slow</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveSpeedGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -601,4 +622,8 @@ p, li { white-space: pre-wrap; }
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="driveDistanceGroup"/>
+  <buttongroup name="driveSpeedGroup"/>
+ </buttongroups>
 </ui>
