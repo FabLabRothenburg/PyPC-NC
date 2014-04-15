@@ -598,16 +598,6 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <action name="action_Manual_Drive">
-   <property name="text">
-    <string>&amp;Manual Drive</string>
-   </property>
-  </action>
-  <action name="action_About">
-   <property name="text">
-    <string>&amp;About</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>
