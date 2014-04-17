@@ -5,8 +5,8 @@ class ControlMachineStatus(QtCore.QObject):
 	pX = None
 	pY = None
 	pZ = None
-	wpX = 0
-	wpY = 0
+	wpX = 1000
+	wpY = 1000
 	wpZ = 0
 
 	statusUpdated = QtCore.Signal()
@@ -21,7 +21,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		if res[0:2] != "@X":
 			raise ValueError("Unexpected reply to @X command: " + res)
-		self.status = res[2:]
+		self.status = int(res[2:])
 
 		if self.status == "14" or self.pX == None:
 			self.pX = self.fetchMachinePos("Px")
@@ -36,5 +36,5 @@ class ControlMachineStatus(QtCore.QObject):
 
 		if res[0:3] != "@" + direction.upper():
 			raise ValueError("Unexpected reply to @" + direction + " command: " + res)
-		return res[3:]
+		return float(res[3:])
 

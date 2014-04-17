@@ -5,9 +5,9 @@ from Control.MachineStatus import ControlMachineStatus
 
 class ControlMainWindow(QtGui.QMainWindow):
 	statusMessages = {
-		'04': 'ready',
-		'14': 'moving',
-		'15': 'ref movement',
+		 4: 'ready',
+		14: 'moving',
+		15: 'ref movement',
 	}
 
 	def __init__(self, chatBackend):
@@ -23,11 +23,15 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def statusUpdated(self):
-		self._ui.statusX.setText("%s (%s)" % (
+		self._ui.statusX.setText("%02d (%s)" % (
 			self._status.status,
 			self.statusMessages[self._status.status]
 		))
 
-		self._ui.statusPx.setText(self._status.pX)
-		self._ui.statusPy.setText(self._status.pY)
-		self._ui.statusPz.setText(self._status.pZ)
+		self._ui.statusPx.setText(str(self._status.pX))
+		self._ui.statusPy.setText(str(self._status.pY))
+		self._ui.statusPz.setText(str(self._status.pZ))
+
+		self._ui.relX.setText(str(self._status.pX - self._status.wpX))
+		self._ui.relY.setText(str(self._status.pY - self._status.wpY))
+		self._ui.relZ.setText(str(self._status.pZ - self._status.wpZ))
