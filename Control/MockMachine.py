@@ -5,6 +5,7 @@ class MockMachine:
 	_px = 0
 	_py = 0
 	_pz = 0
+	_pu = 0
 	_speeds = { }
 
 	soh = 0
@@ -278,6 +279,8 @@ class MockMachine:
 			return "@PY%d" % self._py
 		if command == "@PZ":
 			return "@PZ%d" % self._pz
+		if command == "@PU":
+			return "@PU%d" % self._pu
 
 		if command == '$HZXY':
 			# start reference movement
@@ -288,9 +291,10 @@ class MockMachine:
 			return ''
 
 		if command[0:2] == '#G' and command[4:5] == ',':
-			# #G90 .. #G97 seem to set speed config
+			# #G90 .. #G97 seem to set speed config for reference movement
+			# #G80 .. #G87 likewise for manual movement
 			key = int(command[2:4])
-			if key >= 90 and key <= 97:
+			if (key >= 90 and key <= 97) or (key >= 80 and key <= 87):
 				self._speeds[key] = int(command[6:])
 				return ''
 
