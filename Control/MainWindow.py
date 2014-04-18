@@ -15,6 +15,10 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		self._ui.stop.clicked.connect(self._status.stop)
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
+		self._ui.storeXY.clicked.connect(self._status.storeXY)
+		self._ui.storeXYZ.clicked.connect(self._status.storeXYZ)
+		self._ui.gotoXY.clicked.connect(self.gotoXY)
+		self._ui.gotoXYZ.clicked.connect(self.gotoXYZ)
 
 		self._ui.driveXUp.clicked.connect(self.driveXUp)
 		self._ui.driveYUp.clicked.connect(self.driveYUp)
@@ -49,6 +53,14 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.relX.setText("%.3f" % ((self._status.wpX - self._status.pX) / 1000))
 		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
 		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
+
+	@QtCore.Slot()
+	def gotoXY(self):
+		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, False)
+
+	@QtCore.Slot()
+	def gotoXYZ(self):
+		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, True)
 
 	@QtCore.Slot()
 	def driveXUp(self):

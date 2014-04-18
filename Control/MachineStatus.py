@@ -106,6 +106,38 @@ class ControlMachineStatus(QtCore.QObject):
 		self.movingY = True
 		self.movingZ = True
 
+	@QtCore.Slot()
+	def storeXY(self):
+		self.wpX = self.pX
+		self.wpY = self.pY
+
+	@QtCore.Slot()
+	def storeXYZ(self):
+		self.wpX = self.pX
+		self.wpY = self.pY
+		self.wpZ = self.pZ
+
+	def gotoWorkpiece(self, fast, x, y, z):
+		if not self._preparedManualMove:
+			self.prepareManualMove()
+
+		steps = []
+		if x and self.wpX != self.pX:
+			steps.append('x%d' % (self.wpX - self.pX))
+			self.movingX = True
+		if y and self.wpY != self.pY:
+			steps.append('y%d' % (self.wpY - self.pY))
+			self.movingY = True
+		if z and self.wpZ != self.pZ:
+			steps.append('z%d' % (self.wpZ - self.pZ))
+			self.movingZ = True
+
+		if not steps:
+			return
+
+		self.cts()
+		self._chatBackend.send('$E80,' + ','.join(steps))
+
 	def prepareManualMove(self):
 		commands = [
 			'@M0',
