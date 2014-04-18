@@ -52,6 +52,9 @@ class ControlChatLog():
 
 	@QtCore.Slot(str, str)
 	def messageHandler(self, direction, message):
+		scrollbar = self._listView.verticalScrollBar()
+		scrollToBottom = scrollbar.value() == scrollbar.maximum()
+
 		item = QtGui.QStandardItem(message)
 		item.setEditable(False)
 
@@ -61,4 +64,6 @@ class ControlChatLog():
 			item.setIcon(QtGui.QIcon.fromTheme("go-next"))
 
 		self._model.appendRow(item)
-		self._listView.scrollToBottom()
+
+		if scrollToBottom:
+			self._listView.scrollToBottom()
