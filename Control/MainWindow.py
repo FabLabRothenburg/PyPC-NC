@@ -5,9 +5,10 @@ from Control.MachineStatus import ControlMachineStatus
 
 class ControlMainWindow(QtGui.QMainWindow):
 	statusMessages = {
+		 0: 'started',
 		 4: 'ready',
 		14: 'moving',
-		15: 'ref movement',
+		18: 'ref movement',
 	}
 
 	def __init__(self, chatBackend):
@@ -30,13 +31,14 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self.statusMessages[self._status.status]
 		))
 
-		self._ui.statusPx.setText(str(self._status.pX))
-		self._ui.statusPy.setText(str(self._status.pY))
-		self._ui.statusPz.setText(str(self._status.pZ))
+		self._ui.statusPx.setText("%.3f" % (self._status.pX / 1000))
+		self._ui.statusPy.setText("%.3f" % (self._status.pY / 1000))
+		self._ui.statusPz.setText("%.3f" % (self._status.pZ / 1000))
+		self._ui.statusPu.setText("%.3f" % (self._status.pU / 1000))
 
-		self._ui.relX.setText(str(self._status.pX - self._status.wpX))
-		self._ui.relY.setText(str(self._status.pY - self._status.wpY))
-		self._ui.relZ.setText(str(self._status.pZ - self._status.wpZ))
+		self._ui.relX.setText("%.3f" % ((self._status.wpX - self._status.pX) / 1000))
+		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
+		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
 
 
 class ControlChatLog():

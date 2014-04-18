@@ -5,6 +5,7 @@ class ControlMachineStatus(QtCore.QObject):
 	pX = None
 	pY = None
 	pZ = None
+	pU = None
 	wpX = 1000
 	wpY = 1000
 	wpZ = 0
@@ -29,9 +30,10 @@ class ControlMachineStatus(QtCore.QObject):
 		self.status = int(res[2:])
 
 		if self.status == "14" or self.pX == None:
-			self.pX = self.fetchMachinePos("Px")
-			self.pY = self.fetchMachinePos("Py")
-			self.pZ = self.fetchMachinePos("Pz")
+			self.pX = self.fetchMachinePos("PX")
+			self.pY = self.fetchMachinePos("PY")
+			self.pZ = self.fetchMachinePos("PZ")
+			self.pU = self.fetchMachinePos("PU")
 
 		self.statusUpdated.emit()
 
