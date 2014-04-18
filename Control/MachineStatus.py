@@ -9,6 +9,10 @@ class ControlMachineStatus(QtCore.QObject):
 	wpX = 1000
 	wpY = 1000
 	wpZ = 0
+	movingX = False
+	movingY = False
+	movingZ = False
+	movingU = False
 	_preparedManualMove = False
 
 	statusUpdated = QtCore.Signal()
@@ -31,16 +35,22 @@ class ControlMachineStatus(QtCore.QObject):
 			raise ValueError("Unexpected reply to @X command: " + res)
 		self.status = int(res[2:])
 
-		if self.status == "14" or self.pX == None:
+		if self.pX == None or self.movingX:
 			self.pX = self.fetchMachinePos("PX")
-		if self.status == "14" or self.pY == None:
+		if self.pY == None or self.movingY:
 			self.pY = self.fetchMachinePos("PY")
-		if self.status == "14" or self.pZ == None:
+		if self.pZ == None or self.movingZ:
 			self.pZ = self.fetchMachinePos("PZ")
-		if self.status == "14" or self.pU == None:
+		if self.pU == None or self.movingU:
 			self.pU = self.fetchMachinePos("PU")
 
 		self.statusUpdated.emit()
+
+		if self.status == 4 or self.status == 0:
+			self.movingX = False
+			self.movingY = False
+			self.movingZ = False
+			self.movingU = False
 
 	def fetchMachinePos(self, direction):
 		self.cts()
@@ -92,6 +102,9 @@ class ControlMachineStatus(QtCore.QObject):
 		for command in commands:
 			self.cts()
 			self._chatBackend.send(command, '')
+		self.movingX = True
+		self.movingY = True
+		self.movingZ = True
 
 	def prepareManualMove(self):
 		commands = [
@@ -137,5 +150,5 @@ class ControlMachineStatus(QtCore.QObject):
 		self.cts()
 		self._chatBackend.send('$E%2d,%s%d' % (speed, axis.lower(), steps), '')
 
-		setattr(self, 'p' + axis, None)
+		setattr(self, 'moving' + axis, True)
 
