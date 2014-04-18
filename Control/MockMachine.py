@@ -300,43 +300,35 @@ class MockMachine:
 				self._speeds[key] = int(command[6:])
 				return ''
 
-		# $L84,x1 et al
-		if command[0:2] == '$L' and command[4:5] == ',':
+		# $L84,x1 et al    (single step)
+		# $E80,x100 et al  (move certain distance)
+		if (command[0:2] == '$L' or command[0:2] == '$E') and command[4:5] == ',':
 			key = int(command[2:4])
+
+			if command[0:2] == '$L':
+				if command[6:] == '1':
+					steps = 2
+				elif command[6:] == '1':
+					steps = -2
+				else:
+					return '*031'
+			else:
+				steps = int(command[6:])
+
 			if key >= 80 and key <= 87:
-				if command[6:] == "1":
-					# single step positive direction
-					if command[5:6] == "x":
-						self._px += 2
-					elif command[5:6] == "y":
-						self._py += 2
-					elif command[5:6] == "z":
-						self._pz += 2
-					elif command[5:6] == "u":
-						self._pu += 2
-					else:
-						return "*031"
+				if command[5:6] == "x":
+					self._px += steps
+				elif command[5:6] == "y":
+					self._py += steps
+				elif command[5:6] == "z":
+					self._pz += steps
+				elif command[5:6] == "u":
+					self._pu += steps
+				else:
+					return "*031"
 
-					self.soh += 1
-					return ""
-
-				elif command[6:] == "-1":
-					# single step negative direction
-					if command[5:6] == "x":
-						self._px -= 2
-					elif command[5:6] == "y":
-						self._py -= 2
-					elif command[5:6] == "z":
-						self._pz -= 2
-					elif command[5:6] == "u":
-						self._pu -= 2
-					else:
-						return "*031"
-
-					self.soh += 1
-					return ""
-
-
+				self.soh += 1
+				return ""
 
 		try:
 			return self.staticAnswers[command]

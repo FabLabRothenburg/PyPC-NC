@@ -111,7 +111,7 @@ class ControlMachineStatus(QtCore.QObject):
 			self._chatBackend.send(command, '')
 		self._preparedManualMove = True
 
-	def singleStep(self, axis, positive, fast = False):
+	def singleStep(self, axis, positive, fast):
 		if not self._preparedManualMove:
 			self.prepareManualMove()
 
@@ -122,6 +122,20 @@ class ControlMachineStatus(QtCore.QObject):
 		steps = 1 if positive else -1
 		self.cts()
 		self._chatBackend.send('$L%2d,%s%d' % (speed, axis.lower(), steps), '')
+
+		setattr(self, 'p' + axis, None)
+
+	def manualMove(self, axis, positive, distance, fast):
+		if not self._preparedManualMove:
+			self.prepareManualMove()
+
+		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
+		speed = axisToSpeed[axis];
+		if not fast: speed += 3
+
+		steps = distance if positive else -distance
+		self.cts()
+		self._chatBackend.send('$E%2d,%s%d' % (speed, axis.lower(), steps), '')
 
 		setattr(self, 'p' + axis, None)
 

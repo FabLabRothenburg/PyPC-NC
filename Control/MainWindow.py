@@ -88,6 +88,14 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		if self._ui.drive1Step.isChecked():
 			self._status.singleStep(axis, positive, fast)
+		elif self._ui.drive01mm.isChecked():
+			self._status.manualMove(axis, positive, 100, fast)
+		elif self._ui.drive1mm.isChecked():
+			self._status.manualMove(axis, positive, 1000, fast)
+		elif self._ui.drive10mm.isChecked():
+			self._status.manualMove(axis, positive, 10000, fast)
+		elif self._ui.drive100mm.isChecked():
+			self._status.manualMove(axis, positive, 100000, fast)
 
 class ControlChatLog():
 	def __init__(self, chatLog, listView):
