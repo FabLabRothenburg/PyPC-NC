@@ -306,30 +306,34 @@ class MockMachine:
 
 		# $L84,x1 et al    (single step)
 		# $E80,x100 et al  (move certain distance)
+		# $E81,x1000,y1000 et al
 		if (command[0:2] == '$L' or command[0:2] == '$E') and command[4:5] == ',':
 			key = int(command[2:4])
-
-			if command[0:2] == '$L':
-				if command[6:] == '1':
-					steps = 2
-				elif command[6:] == '1':
-					steps = -2
-				else:
-					return '*031'
-			else:
-				steps = int(command[6:])
-
 			if key >= 80 and key <= 87:
-				if command[5:6] == "x":
-					self._px += steps
-				elif command[5:6] == "y":
-					self._py += steps
-				elif command[5:6] == "z":
-					self._pz += steps
-				elif command[5:6] == "u":
-					self._pu += steps
-				else:
-					return "*031"
+				for movement in command[5:].split(","):
+					print movement
+					if command[0:2] == '$L':
+						if movement[1:] == '1':
+							steps = 2
+						elif movement[1:] == '1':
+							steps = -2
+						else:
+							return '*031'
+					else:
+						steps = int(movement[1:])
+
+					print steps
+					print movement[0]
+					if movement[0] == "x":
+						self._px += steps
+					elif movement[0] == "y":
+						self._py += steps
+					elif movement[0] == "z":
+						self._pz += steps
+					elif movement[0] == "u":
+						self._pu += steps
+					else:
+						return "*031"
 
 				self.soh += 1
 				return ""
