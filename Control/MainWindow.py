@@ -7,6 +7,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	statusMessages = {
 		 0: 'started',
 		 4: 'ready',
+		10: '???',
 		14: 'moving',
 		18: 'ref movement',
 	}
