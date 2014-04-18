@@ -9,6 +9,10 @@ class ChatLog(QtCore.QObject):
 	def append(self, direction, message):
 		if direction != "in" and direction != "out":
 			raise ValueError("direction must be either in or out")
+
+		if message == '\001': message = '$SOH'
+		if message == '\004': message = '$EOT'
+
 		entry = direction, message
 		self._log.append(entry)
 

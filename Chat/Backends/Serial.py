@@ -25,6 +25,16 @@ class ChatBackendSerial(ChatBackendBase):
 		self._buffer += self._serial.read(1024).replace('\r\n', '\n').replace('\r', '\n')
 
 		while True:
+			if self._buffer[0] == '\001':
+				self._nextLines.append('\001')
+				self._buffer = self._buffer[1:]
+				continue
+
+			if self._buffer[0] == '\004':
+				self._nextLines.append('\004')
+				self._buffer = self._buffer[1:]
+				continue
+
 			pos = self._buffer.find('\n')
 			if(pos < 0): break
 

@@ -13,5 +13,14 @@ class ChatBackendMock(ChatBackendBase):
 
 	def _send(self, sendStr):
                 reply = self._machine.process(sendStr)
-                if reply != "":
+
+                if reply != None:
                         self._nextLines.append(reply)
+
+		while self._machine.soh:
+			self._nextLines.append('\001')
+			self._machine.soh -= 1
+
+		while self._machine.eot:
+			self._nextLines.append('\004')
+			self._machine.eot -= 1
