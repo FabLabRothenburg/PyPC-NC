@@ -48,3 +48,32 @@ class ControlMachineStatus(QtCore.QObject):
         @QtCore.Slot()
         def stop(self):
                 self._chatBackend.send('@B')
+
+	@QtCore.Slot()
+	def refMovement(self):
+		commands = [
+			'@M0',
+			'#DX,0,90,94,90',
+			'#DY,0,91,95,91',
+			'#DZ,0,92,96,92',
+			'#G90,15000',
+			'#G91,15000',
+			'#G92,10000',
+			'#G94,2000',
+			'#G95,2000',
+			'#G96,2000',
+			'#DU,0,93,97,93',
+			'#G93,10000',
+			'#G97,1000',
+			'#OU,0',
+			'#W',
+			'@M1',
+			'$A00',
+			'@M1',
+			'@D08',
+			'$HZXY',
+		]
+
+		for command in commands:
+			self._chatBackend.send(command, '')
+

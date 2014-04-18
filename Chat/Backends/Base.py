@@ -32,6 +32,11 @@ class ChatBackendBase:
 		self._processLines()
 		self._send(sendStr)
 
+		if expectStr:
+			result = self.getline()
+			if result != expectStr:
+				raise RuntimeError("Unexpected Controller reply, got %s instead of %s" % (result, expectStr))
+
 	def getline(self):
 		if not self._nextLines:
 			self._read()
