@@ -43,3 +43,6 @@ class ControlMachineStatus(QtCore.QObject):
 			raise ValueError("Unexpected reply to @" + direction + " command: " + res)
 		return float(res[3:])
 
+        @QtCore.Slot()
+        def stop(self):
+                self._chatBackend.send('@B')

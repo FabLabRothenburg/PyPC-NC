@@ -18,9 +18,9 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		self._ui = Ui_MainWindow()
 		self._ui.setupUi(self)
+		self._ui.stop.clicked.connect(self._status.stop)
 
 		self._logger = ControlChatLog(chatBackend.getChatLog(), self._ui.log)
-
 		self._status.updateStatus()
 
 	@QtCore.Slot()
