@@ -5,11 +5,20 @@ from Control import *
 
 from PySide import QtGui
 import sys
+import argparse
 
 if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description='Python GUI tool to drive a CNC controller')
+	parser.add_argument('--mock', '-m', action='store_true', help='use mock backend, instead of serial')
+	parser.add_argument('--device', '-D', default='/dev/ttyS0', help='set device name')
+
+	args = parser.parse_args()
 	log = Chat.ChatLog()
-        cb = Chat.Backends.ChatBackendSerial(log, '/dev/pts/4')
-	#cb = Chat.Backends.ChatBackendMock(log)
+
+	if args.mock:
+		cb = Chat.Backends.ChatBackendMock(log)
+	else:
+		cb = Chat.Backends.ChatBackendSerial(log, args.device)
 
 	app = QtGui.QApplication(sys.argv)
 	mainwin = ControlMainWindow(cb)
