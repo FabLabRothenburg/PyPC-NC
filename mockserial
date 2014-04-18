@@ -26,9 +26,17 @@ def main():
 		print "<<< %s" % cmd
 		reply = machine.process(cmd)
 
-		if reply != "":
+		if reply != None:
 			print ">>> %s" % reply
 			os.write(master, reply + '\r')
+
+		while machine.soh:
+			os.write(master, '\001')
+			machine.soh -= 1
+
+		while machine.eot:
+			os.write(master, '\004')
+			machine.eot -= 1
 
 if __name__ == "__main__":
 	main()
