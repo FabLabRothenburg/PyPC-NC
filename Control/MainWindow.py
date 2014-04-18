@@ -19,6 +19,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui = Ui_MainWindow()
 		self._ui.setupUi(self)
 
+		self._logger = ControlChatLog(chatBackend.getChatLog(), self._ui.log)
+
 		self._status.updateStatus()
 
 	@QtCore.Slot()
@@ -35,3 +37,28 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.relX.setText(str(self._status.pX - self._status.wpX))
 		self._ui.relY.setText(str(self._status.pY - self._status.wpY))
 		self._ui.relZ.setText(str(self._status.pZ - self._status.wpZ))
+
+
+class ControlChatLog():
+	def __init__(self, chatLog, listView):
+		self._chatLog = chatLog;
+		self._listView = listView;
+
+		self._model = QtGui.QStandardItemModel(listView);
+		listView.setModel(self._model);
+
+		chatLog.newMessage.connect(self.messageHandler)
+
+
+	@QtCore.Slot(str, str)
+	def messageHandler(self, direction, message):
+		item = QtGui.QStandardItem(message)
+		item.setEditable(False)
+
+		if direction == "out":
+			item.setIcon(QtGui.QIcon.fromTheme("go-previous"))
+		else:
+			item.setIcon(QtGui.QIcon.fromTheme("go-next"))
+
+		self._model.appendRow(item)
+		self._listView.scrollToBottom()
