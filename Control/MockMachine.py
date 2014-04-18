@@ -253,6 +253,10 @@ class MockMachine:
 		#
 		"&C17":			"&C17,-26673,-53329,-5336,0",
 
+		#
+		# somewhen !?
+		#
+		"$D0":			"",
 	}
 
 	def _refMoveZ(self):
