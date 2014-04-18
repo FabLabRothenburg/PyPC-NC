@@ -32,7 +32,7 @@ class ChatBackendBase:
 		self._processLines()
 		self._send(sendStr)
 
-		if expectStr:
+		if expectStr != None:
 			result = self.getline()
 			if result != expectStr:
 				raise RuntimeError("Unexpected Controller reply, got %s instead of %s" % (result, expectStr))
@@ -49,3 +49,6 @@ class ChatBackendBase:
 		while self._nextLines:
 			msg = self.getline()
 			print "ignoring: %s" % msg
+
+	def hasLines(self):
+		return bool(self._nextLines)

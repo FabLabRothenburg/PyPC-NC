@@ -303,9 +303,7 @@ class MockMachine:
 		# $L84,x1 et al
 		if command[0:2] == '$L' and command[4:5] == ',':
 			key = int(command[2:4])
-			print key
 			if key >= 80 and key <= 87:
-				print command[6:]
 				if command[6:] == "1":
 					# single step positive direction
 					if command[5:6] == "x":

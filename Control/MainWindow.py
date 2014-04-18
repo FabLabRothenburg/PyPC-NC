@@ -23,6 +23,15 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.stop.clicked.connect(self._status.stop)
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
 
+		self._ui.driveXUp.clicked.connect(self.driveXUp)
+		self._ui.driveYUp.clicked.connect(self.driveYUp)
+		self._ui.driveZUp.clicked.connect(self.driveZUp)
+		self._ui.driveUUp.clicked.connect(self.driveUUp)
+		self._ui.driveXDown.clicked.connect(self.driveXDown)
+		self._ui.driveYDown.clicked.connect(self.driveYDown)
+		self._ui.driveZDown.clicked.connect(self.driveZDown)
+		self._ui.driveUDown.clicked.connect(self.driveUDown)
+
 		self._logger = ControlChatLog(chatBackend.getChatLog(), self._ui.log)
 		self._status.updateStatus()
 
@@ -42,6 +51,43 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
 		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
 
+	@QtCore.Slot()
+	def driveXUp(self):
+		self.manualMove('X', True)
+
+	@QtCore.Slot()
+	def driveYUp(self):
+		self.manualMove('Y', True)
+
+	@QtCore.Slot()
+	def driveZUp(self):
+		self.manualMove('Z', True)
+
+	@QtCore.Slot()
+	def driveUUp(self):
+		self.manualMove('U', True)
+
+	@QtCore.Slot()
+	def driveXDown(self):
+		self.manualMove('X', False)
+
+	@QtCore.Slot()
+	def driveYDown(self):
+		self.manualMove('Y', False)
+
+	@QtCore.Slot()
+	def driveZDown(self):
+		self.manualMove('Z', False)
+
+	@QtCore.Slot()
+	def driveUDown(self):
+		self.manualMove('U', False)
+
+	def manualMove(self, axis, positive):
+		fast = self._ui.driveFast.isChecked()
+
+		if self._ui.drive1Step.isChecked():
+			self._status.singleStep(axis, positive, fast)
 
 class ControlChatLog():
 	def __init__(self, chatLog, listView):

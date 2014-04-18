@@ -9,6 +9,7 @@ class ControlMachineStatus(QtCore.QObject):
 	wpX = 1000
 	wpY = 1000
 	wpZ = 0
+	_preparedManualMove = False
 
 	statusUpdated = QtCore.Signal()
 
@@ -22,6 +23,7 @@ class ControlMachineStatus(QtCore.QObject):
 
         @QtCore.Slot()
 	def updateStatus(self):
+		self.cts()
 		self._chatBackend.send("@X")
 		res = self._chatBackend.getline()
 
@@ -31,19 +33,33 @@ class ControlMachineStatus(QtCore.QObject):
 
 		if self.status == "14" or self.pX == None:
 			self.pX = self.fetchMachinePos("PX")
+		if self.status == "14" or self.pY == None:
 			self.pY = self.fetchMachinePos("PY")
+		if self.status == "14" or self.pZ == None:
 			self.pZ = self.fetchMachinePos("PZ")
+		if self.status == "14" or self.pU == None:
 			self.pU = self.fetchMachinePos("PU")
 
 		self.statusUpdated.emit()
 
 	def fetchMachinePos(self, direction):
+		self.cts()
 		self._chatBackend.send("@" + direction)
 		res = self._chatBackend.getline()
 
 		if res[0:3] != "@" + direction.upper():
 			raise ValueError("Unexpected reply to @" + direction + " command: " + res)
 		return float(res[3:])
+
+	def cts(self):
+		while self._chatBackend.hasLines():
+			msg = self._chatBackend.getline()
+			if msg == "\001":
+				print "SOH"
+			elif msg == "\004":
+				print "EOT"
+			else:
+				print "not processed reply: %s" % msg
 
         @QtCore.Slot()
         def stop(self):
@@ -73,7 +89,39 @@ class ControlMachineStatus(QtCore.QObject):
 			'@D08',
 			'$HZXY',
 		]
-
 		for command in commands:
+			self.cts()
 			self._chatBackend.send(command, '')
+
+	def prepareManualMove(self):
+		commands = [
+			'@M0',
+			'#G80,15000',
+			'#G81,15000',
+			'#G82,10000',
+			'#G83,10000',
+			'#G84,2000',
+			'#G85,2000',
+			'#G86,2000',
+			'#G87,1000',
+			'@M1',
+		]
+		for command in commands:
+			self.cts()
+			self._chatBackend.send(command, '')
+		self._preparedManualMove = True
+
+	def singleStep(self, axis, positive, fast = False):
+		if not self._preparedManualMove:
+			self.prepareManualMove()
+
+		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
+		speed = axisToSpeed[axis];
+		if not fast: speed += 3
+
+		steps = 1 if positive else -1
+		self.cts()
+		self._chatBackend.send('$L%2d,%s%d' % (speed, axis.lower(), steps), '')
+
+		setattr(self, 'p' + axis, None)
 
