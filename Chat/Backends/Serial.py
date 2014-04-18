@@ -15,16 +15,22 @@ class ChatBackendSerial(ChatBackendBase):
 	def _poll(self):
 		self._read(0)
 
-	def _read(self, timeout = 0.2):
-		# read one byte with timeout set, i.e. wait until we received data ...
-		self._serial.timeout = timeout
-		self._buffer += self._serial.read(1).replace('\r\n', '\n').replace('\r', '\n')
-
-		# ... now fetch the rest, but don't wait for exactly 1k of data
+	def _read(self, timeout = .2):
+		# fetch anything that already is in buffer
 		self._serial.timeout = 0
 		self._buffer += self._serial.read(1024).replace('\r\n', '\n').replace('\r', '\n')
 
+		self._serial.timeout = timeout
 		while True:
+			char = self._serial.read(1)
+			if len(char) == 0: break
+
+			if char == '\r': char = '\n'
+			self._buffer += char
+
+			if char == '\n': break
+
+		while len(self._buffer):
 			if self._buffer[0] == '\001':
 				self._nextLines.append('\001')
 				self._buffer = self._buffer[1:]
