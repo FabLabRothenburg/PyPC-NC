@@ -273,15 +273,16 @@ class MockMachine:
 		if command == "@X":
 			return "@X%02d" % self._status
 
-		if command == "@PX":
+		if command == "@PX" or command == "@Px":
 			return "@PX%d" % self._px
-		if command == "@PY":
+		if command == "@PY" or command == "@Py":
 			return "@PY%d" % self._py
-		if command == "@PZ":
+		if command == "@PZ" or command == "@Pz":
 			return "@PZ%d" % self._pz
-		if command == "@PU":
+		if command == "@PU" or command == "@Pu":
 			return "@PU%d" % self._pu
 
+		# $HZXY
 		if command == '$HZXY':
 			# start reference movement
 			Timer(2, self._refMoveZ).start()
@@ -290,6 +291,7 @@ class MockMachine:
 			self._status = 18
 			return ''
 
+		# G90,15000 et al
 		if command[0:2] == '#G' and command[4:5] == ',':
 			# #G90 .. #G97 seem to set speed config for reference movement
 			# #G80 .. #G87 likewise for manual movement
@@ -297,6 +299,46 @@ class MockMachine:
 			if (key >= 90 and key <= 97) or (key >= 80 and key <= 87):
 				self._speeds[key] = int(command[6:])
 				return ''
+
+		# $L84,x1 et al
+		if command[0:2] == '$L' and command[4:5] == ',':
+			key = int(command[2:4])
+			print key
+			if key >= 80 and key <= 87:
+				print command[6:]
+				if command[6:] == "1":
+					# single step positive direction
+					if command[5:6] == "x":
+						self._px += 2
+					elif command[5:6] == "y":
+						self._py += 2
+					elif command[5:6] == "z":
+						self._pz += 2
+					elif command[5:6] == "u":
+						self._pu += 2
+					else:
+						return "*031"
+
+					self.soh += 1
+					return ""
+
+				elif command[6:] == "-1":
+					# single step negative direction
+					if command[5:6] == "x":
+						self._px -= 2
+					elif command[5:6] == "y":
+						self._py -= 2
+					elif command[5:6] == "z":
+						self._pz -= 2
+					elif command[5:6] == "u":
+						self._pu -= 2
+					else:
+						return "*031"
+
+					self.soh += 1
+					return ""
+
+
 
 		try:
 			return self.staticAnswers[command]
