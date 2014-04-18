@@ -29,11 +29,18 @@ class ChatBackendBase:
 		# @todo expectStr
 
 		self._poll()
+		self._processLines()
 		self._send(sendStr)
 
 	def getline(self):
-		self._read()
+		if not self._nextLines:
+			self._read()
 
 		msg = self._nextLines.popleft()
 		self._chatLog.append("in", msg);
 		return msg
+
+	def _processLines(self):
+		while self._nextLines:
+			msg = self.getline()
+			print "ignoring: %s" % msg
