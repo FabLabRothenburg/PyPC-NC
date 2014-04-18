@@ -311,19 +311,16 @@ class MockMachine:
 			key = int(command[2:4])
 			if key >= 80 and key <= 87:
 				for movement in command[5:].split(","):
-					print movement
 					if command[0:2] == '$L':
 						if movement[1:] == '1':
 							steps = 2
-						elif movement[1:] == '1':
+						elif movement[1:] == '-1':
 							steps = -2
 						else:
 							return '*031'
 					else:
 						steps = int(movement[1:])
 
-					print steps
-					print movement[0]
 					if movement[0] == "x":
 						self._px += steps
 					elif movement[0] == "y":
