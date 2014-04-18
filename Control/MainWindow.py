@@ -4,14 +4,6 @@ from PySide import QtGui, QtCore
 from Control.MachineStatus import ControlMachineStatus
 
 class ControlMainWindow(QtGui.QMainWindow):
-	statusMessages = {
-		 0: 'started',
-		 4: 'ready',
-		10: '???',
-		14: 'moving',
-		18: 'ref movement',
-	}
-
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
 
@@ -38,11 +30,17 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def statusUpdated(self):
-		self._ui.statusX.setText("%02d (%s)" % (
-			self._status.status,
-			self.statusMessages[self._status.status]
-		))
+		infos = []
+		if self._status.status & 0x10: infos.append('moving')
+		if self._status.status & 0x04: infos.append("ref'd")
+		if self._status.status & 0x08: infos.append("ref'ing")
 
+		status = hex(self._status.status)
+
+		if infos:
+			status += ' (' + ', '.join(infos) + ')'
+
+		self._ui.statusX.setText(status)
 		self._ui.statusPx.setText("%.3f" % (self._status.pX / 1000))
 		self._ui.statusPy.setText("%.3f" % (self._status.pY / 1000))
 		self._ui.statusPz.setText("%.3f" % (self._status.pZ / 1000))

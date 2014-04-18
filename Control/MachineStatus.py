@@ -33,7 +33,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		if res[0:2] != "@X":
 			raise ValueError("Unexpected reply to @X command: " + res)
-		self.status = int(res[2:])
+		self.status = int(res[2:], 16)
 
 		if self.pX == None or self.movingX:
 			self.pX = self.fetchMachinePos("PX")
@@ -46,7 +46,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		self.statusUpdated.emit()
 
-		if self.status == 4 or self.status == 0:
+		if (self.status & 0x10) == 0:
 			self.movingX = False
 			self.movingY = False
 			self.movingZ = False
