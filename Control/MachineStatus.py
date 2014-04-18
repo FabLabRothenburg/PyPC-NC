@@ -15,6 +15,11 @@ class ControlMachineStatus(QtCore.QObject):
 		QtCore.QObject.__init__(self)
 		self._chatBackend = chatBackend
 
+                self._timer = QtCore.QTimer(self)
+                self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
+                self._timer.start(1000)
+
+        @QtCore.Slot()
 	def updateStatus(self):
 		self._chatBackend.send("@X")
 		res = self._chatBackend.getline()
