@@ -8,7 +8,8 @@ import sys
 
 if __name__ == "__main__":
 	log = Chat.ChatLog()
-	cb = Chat.Backends.ChatBackendMock(log)
+        cb = Chat.Backends.ChatBackendSerial(log, '/dev/pts/4')
+	#cb = Chat.Backends.ChatBackendMock(log)
 
 	app = QtGui.QApplication(sys.argv)
 	mainwin = ControlMainWindow(cb)

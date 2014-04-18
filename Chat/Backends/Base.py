@@ -1,7 +1,10 @@
+from collections import deque
+
 class ChatBackendBase:
 	"""Common base class for chat backend implementations."""
 	_chatLog = None
 	_sane = True
+	_nextLines = deque()
 
 	def __init__(self, chatLog):
 		self._chatLog = chatLog
@@ -9,11 +12,28 @@ class ChatBackendBase:
 	def getChatLog(self):
 		return self._chatLog
 
-	def send(self, sendStr, expectStr = None):
-		raise NotImplementedError("ChatBackendBase::send is abstract")
+	def _send(self, bytes):
+		raise NotImplementedError("ChatBackendBase::_send is abstract")
 
-	def getline(self):
-		raise NotImplementedError("ChatBackendBase::getline is abstract")
+	def _poll(self):
+		raise NotImplementedError("ChatBackendBase::_poll is abstract")
+
+	def _read(self):
+		raise NotImplementedError("ChatBackendBase::_read is abstract")
 
 	def isSane(self):
 		return _sane
+
+	def send(self, sendStr, expectStr = None):
+		self._chatLog.append("out", sendStr)
+		# @todo expectStr
+
+		self._poll()
+		self._send(sendStr)
+
+	def getline(self):
+		self._read()
+
+		msg = self._nextLines.popleft()
+		self._chatLog.append("in", msg);
+		return msg
