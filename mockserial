@@ -18,25 +18,26 @@ def main():
 	while True:
 		buffer += os.read(master, 128).replace('\r\n', '\n').replace('\r', '\n')
 
-		pos = buffer.find('\n')
-		if(pos < 0): continue
-		cmd = buffer[:pos]
-		buffer = buffer[pos + 1:]
+		while True:
+			pos = buffer.find('\n')
+			if(pos < 0): break
+			cmd = buffer[:pos]
+			buffer = buffer[pos + 1:]
 
-		print "<<< %s" % cmd
-		reply = machine.process(cmd)
+			print "<<< %s" % cmd
+			reply = machine.process(cmd)
 
-		if reply != None:
-			print ">>> %s" % reply
-			os.write(master, reply + '\r')
+			if reply != None:
+				print ">>> %s" % reply
+				os.write(master, reply + '\r')
 
-		while machine.soh:
-			os.write(master, '\001')
-			machine.soh -= 1
+			while machine.soh:
+				os.write(master, '\001')
+				machine.soh -= 1
 
-		while machine.eot:
-			os.write(master, '\004')
-			machine.eot -= 1
+			while machine.eot:
+				os.write(master, '\004')
+				machine.eot -= 1
 
 if __name__ == "__main__":
 	main()

@@ -6,6 +6,10 @@ class MockMachine:
 	_py = 0
 	_pz = 0
 	_pu = 0
+
+	_planSteps = 0
+	_curStep = 0
+
 	_speeds = { }
 
 	soh = 0
@@ -18,7 +22,6 @@ class MockMachine:
 		"@M":			"@M00",
 		"@S":			"",
 		"@M1":			"",
-		"@M0":			"",
 		"@M0":			"",
 		"&ZX":			"&ZX,1600",
 		"&ZY":			"&ZY,1600",
@@ -135,7 +138,6 @@ class MockMachine:
 		"&C45":			"&C45,0",
 		"&Q218":		"&Q218,000h,0,0",
 		"@C":			"@C0",
-		"@M0":			"",
 		"&I255":		"&I255,301h,0,0",
 		"&I254":		"&I254,301h,1,0",
 		"&I247":		"&I247,000h,0,0",
@@ -233,7 +235,6 @@ class MockMachine:
 		"&Q228":		"&Q228,000h,0,0",
 		"&Q229":		"&Q229,000h,0,0",
 		"&Q230":		"&Q230,000h,0,0",
-		"@M0":			"",
 
 		#
 		# chatter before reference movement
@@ -257,6 +258,42 @@ class MockMachine:
 		# somewhen !?
 		#
 		"$D0":			"",
+
+		#
+		# programmed movement
+		#
+		"@N0":			"",
+		"@M2":			"",
+		"C08":			None,
+		"D141":			None,
+		"A10":			None,
+		"A40":			None,
+		"A50":			None,
+		"A51":			None,
+		"A60":			None,
+		"W100":			None,
+		"W10":			None,
+		"C10":			None,
+		"D0":			None,
+
+		"Q100,0":		None,
+		"Q101,0":		None,
+		"Q102,0":		None,
+		"Q103,0":		None,
+		"Q104,0":		None,
+		"Q105,0":		None,
+		"Q106,0":		None,
+		"Q107,0":		None,
+
+		"@Q100,0":		None,
+		"@Q101,0":		None,
+		"@Q102,0":		None,
+		"@Q103,0":		None,
+		"@Q104,0":		None,
+		"@Q105,0":		None,
+		"@Q106,0":		None,
+		"@Q107,0":		None,
+
 	}
 
 	def _refMoveZ(self):
@@ -268,14 +305,16 @@ class MockMachine:
 	def _refMoveY(self):
 		self.soh += 1
 		self.eot += 1
-		self._status = 4
+		self._status = 0x04
 
 	def process(self, command):
 		if command == '':
 			return None
 
 		if command == "@X":
-			return "@X%02d" % self._status
+			reply = "@X" + '{0:02x}'.format(self._status)
+			if self._status == 0x15: self._status = 0x14
+			return reply
 
 		if command == "@PX" or command == "@Px":
 			return "@PX%d" % self._px
@@ -286,22 +325,29 @@ class MockMachine:
 		if command == "@PU" or command == "@Pu":
 			return "@PU%d" % self._pu
 
+		if command == '@B':  # stop machine
+			return ''
+
+		if command == '@@':  # reset ??
+			return ''
+
 		# $HZXY
 		if command == '$HZXY':
 			# start reference movement
-			Timer(2, self._refMoveZ).start()
-			Timer(5, self._refMoveX).start()
-			Timer(8, self._refMoveY).start()
-			self._status = 18
+			Timer(0.3, self._refMoveZ).start()
+			Timer(0.8, self._refMoveX).start()
+			Timer(1.3, self._refMoveY).start()
+			self._status |= 0x18
 			return ''
 
 		# G90,15000 et al
-		if command[0:2] == '#G' and command[4:5] == ',':
-			# #G90 .. #G97 seem to set speed config for reference movement
-			# #G80 .. #G87 likewise for manual movement
-			key = int(command[2:4])
-			if (key >= 90 and key <= 97) or (key >= 80 and key <= 87):
-				self._speeds[key] = int(command[6:])
+		# #G90 .. #G97 seem to set speed config for reference movement
+		# #G80 .. #G87 likewise for manual movement
+		if command[0:2] == '#G':
+			pos = command.find(',')
+			if(pos > 0):
+				key = int(command[2:pos])
+				self._speeds[key] = int(command[pos+1:])
 				return ''
 
 		# $L84,x1 et al    (single step)
@@ -334,6 +380,51 @@ class MockMachine:
 
 				self.soh += 1
 				return ""
+
+		# #E21,5000,30
+		# #E41,10000,30 et al
+		if command[0:4] == '#E21' or command[0:4] == '#E41':
+			return ''
+
+		# #C2,9
+		# #C14,17
+		# #C43,1
+		if command[0:2] == '#C':
+			return ''
+
+		if command == 'E':
+			self._planSteps += 1
+			return None
+
+		# V1,X75855
+		# V21,X155855
+		# V21,Y170652
+		# V21,X75855
+		# V21,Y90652
+		if command[0] == 'V':
+			self._status |= 0x10
+			return None
+
+		# K21,x10000,y0,p-1570796
+		# K21,x0,y10000,p4712389
+		# K21,x-10000,y0,p4712389
+		# K21,x0,y-10000,p4712389
+		if command[0] == 'K':
+			self._status |= 0x10
+			return None
+
+		if command == '@N':
+			reply = '@N%d' % self._curStep
+			if self._curStep < self._planSteps:
+				self._curStep += 1	# @fixme move somewhere more suitable and adjust @Px et al
+			else:
+				self._status &= 0xEF
+			return reply
+
+		if command == 'A50':
+			self._status |= 1
+			return ''
+
 
 		try:
 			return self.staticAnswers[command]
