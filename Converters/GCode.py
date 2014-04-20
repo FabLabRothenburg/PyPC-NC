@@ -124,7 +124,7 @@ class GCodeInterpreter:
 				self.position[i] = pos[i]
 				self.incrPosition[i] = pos[i]
 
-	def processG0(self, insn):  # rapid motion
+	def _straightMotion(self, insn, rapid):
 		move = self._readAxes(insn)
 
 		if self.absDistanceMode:
@@ -146,11 +146,33 @@ class GCodeInterpreter:
 			if target[i] != None and target[i] != self.position[i]:
 				command.append('%s%d' % (self.axes[i], target[i] * 1000))
 
+		if not rapid:
+			command[0] = 'V21'
+			C = 8
+			W = 10
+		else:
+			C = None
+			W = None
+
 		self.firstMove = False
 
 		if len(command) < 2:
 			return
 
 		self.buffer.append('E')
+
+		if C and (C != self.C or W != self.W):
+			self.buffer.append('C%02d' % C)
+			self.buffer.append('W%d' % W)
+
+			self.C = C
+			self.W = W
+
 		self.buffer.append(','.join(command))
 		self._mergeIntoPosition(target)
+
+	def processG0(self, insn):  # rapid motion
+		self._straightMotion(insn, True)
+
+	def processG1(self, insn):  # coordinated motion
+		self._straightMotion(insn, False)

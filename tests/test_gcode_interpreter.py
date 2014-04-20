@@ -147,3 +147,15 @@ class WriteZOnFirstMove(unittest.TestCase):
 		self.i.process([ 'G0', 'X1', 'Y1' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000,Y10000', 'E', 'V1,X11000,Y11000' ])
 
+
+
+class TestCoordinatedMotionG1(unittest.TestCase):
+	def setUp(self):
+		self.i = GCode.GCodeInterpreter()
+		self.i.buffer = []
+		self.i.position = [ 5.000, 0.0, 2.000 ]
+
+	def test_G1_simpleX0(self):
+		self.i.process([ 'G1', 'X0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X10000' ])
+
