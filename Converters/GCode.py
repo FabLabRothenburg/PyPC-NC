@@ -212,6 +212,9 @@ class GCodeInterpreter:
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
+		target[0] = round(target[0], 3)
+		target[1] = round(target[1], 3)
+
 		xa = self.position[0]
 		ya = self.position[1]
 		xb = target[0]
@@ -247,8 +250,11 @@ class GCodeInterpreter:
 		# law of cosine
 		gamma = math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))
 
+		x = round((xc - xa) * 1000)
+		y = round((yc - ya) * 1000)
+
 		self.buffer.append('E')
 		self._setSpeed(False)  # always "slow" motion
-		self.buffer.append('K21,x%d,y%d,p%d' % ((xc - xa) * 1000, (yc - ya) * 1000, gamma * -1000000))
+		self.buffer.append('K21,x%d,y%d,p%d' % (x, y, gamma * -1000000))
 		self._mergeIntoPosition(target)
 		self.firstMove = False

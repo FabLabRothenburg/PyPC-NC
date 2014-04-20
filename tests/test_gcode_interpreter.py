@@ -247,3 +247,20 @@ class TestSimpleCircles(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x0,y20000,p-1570796'
 		])
 
+	def test_basicQuarterCircle(self):
+		self.i.process([ 'G0', 'X10', 'Y15' ])
+		self.i.process([ 'G2', 'X-10', 'Y-5', 'R20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X20000,Y25000',
+			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p-1570796'
+		])
+
+	def test_basicArcWith20Degrees(self):
+		self.i.process([ 'G0', 'X10', 'Y15' ])
+		self.i.process([ 'G2', 'X8.79385241572', 'Y21.8404028665', 'R20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X20000,Y25000',
+			'E', 'E', 'C08', 'W10', 'K21,x18794,y6840,p-349044'
+		])
