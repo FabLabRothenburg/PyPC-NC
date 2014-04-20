@@ -220,12 +220,30 @@ class TestSimpleCircles(unittest.TestCase):
 		self.i.buffer = []
 		self.i.position = [ 9.000, 9.000, 0.000 ]
 
-	def test_basicFullCircle(self):
+	def test_basicQuarterCircle(self):
 		self.i.process([ 'G0', 'X10', 'Y15' ])
 		self.i.process([ 'G2', 'X-10', 'Y-5', 'R20' ])
 
 		self.assertEqual(self.i.buffer, [
 			'E', 'V2,X20000,Y25000',
 			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p-1570796'
+		])
+
+	def test_basicHalfCircle(self):
+		self.i.process([ 'G0', 'X10', 'Y15' ])
+		self.i.process([ 'G2', 'X-30', 'Y15', 'R20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X20000,Y25000',
+			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p-3141592'
+		])
+
+	def test_basicQuarterCircle2(self):
+		self.i.process([ 'G0', 'X-10', 'Y-5' ])
+		self.i.process([ 'G2', 'X-30', 'Y15', 'R20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X0,Y5000',
+			'E', 'E', 'C08', 'W10', 'K21,x0,y20000,p-1570796'
 		])
 
