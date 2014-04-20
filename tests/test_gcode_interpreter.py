@@ -191,3 +191,26 @@ class TestG0G1Switching(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'V21,X15000,Y15000',
 			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X10000,Y10000'
 		])
+
+	def test_G1G0G1G0(self):
+		self.i.process([ 'G1', 'X0', 'Y0' ])
+		self.i.process([ 'G1', 'X1', 'Y0' ])
+		self.i.process([ 'G0', 'X1', 'Y2' ])
+		self.i.process([ 'G0', 'X3', 'Y3' ])
+		self.i.process([ 'G1', 'X4', 'Y5' ])
+		self.i.process([ 'G1', 'X6', 'Y6' ])
+		self.i.process([ 'G0', 'X1', 'Y1' ])
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'C08', 'W10', 'V21,X10000,Y10000',
+			'E', 'V21,X11000',
+			'E', 'C10', 'W10',
+			'E', 'C10', 'W10', 'V2,Y12000',
+			'E', 'V1,X13000,Y13000',
+			'E', 'E', 'C08', 'W10', 'V21,X14000,Y15000',
+			'E', 'V21,X16000,Y16000',
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X11000,Y11000',
+			'E', 'V1,X10000,Y10000',
+		])
+
