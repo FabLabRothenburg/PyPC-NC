@@ -134,6 +134,7 @@ class GCodeInterpreter:
 
 		command = [ None ]
 		dist = 0
+		twice = False
 
 		for i in xrange(3):
 			if self.firstMove and not self.absDistanceMode and target[i] == None:
@@ -154,10 +155,13 @@ class GCodeInterpreter:
 			if len(command) == 2 and command[1][0] == 'Z':
 				command[1] = command[1].lower()
 		else:
-			C = None
-			W = None
-
-		self.firstMove = False
+			if self.C == 8 and self.W == 100:
+				# don't change C8 W100, whyever ...
+				C = None
+			else:
+				C = 10
+				W = 10
+				twice = True
 
 		if len(command) < 2:
 			return
@@ -165,6 +169,13 @@ class GCodeInterpreter:
 		self.buffer.append('E')
 
 		if C and (C != self.C or W != self.W):
+			if twice:
+				self.buffer.append('C%02d' % C)
+				self.buffer.append('W%d' % W)
+
+			if not self.firstMove:
+				self.buffer.append('E')
+
 			self.buffer.append('C%02d' % C)
 			self.buffer.append('W%d' % W)
 
@@ -173,6 +184,7 @@ class GCodeInterpreter:
 
 		self.buffer.append(','.join(command))
 		self._mergeIntoPosition(target)
+		self.firstMove = False
 
 	def processG0(self, insn):  # rapid motion
 		self._straightMotion(insn, True)
