@@ -1,12 +1,7 @@
 import unittest
 from Converters import GCode
 
-class TestGCodeInterpreter(unittest.TestCase):
-	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
-		self.i.buffer = []
-		self.i.position = [ 5.000, 0.0, 2.000 ]
-
+class TestInterpreterBasics(unittest.TestCase):
 	def test_splitBlockSelf(self):
 		i = GCode.GCodeInterpreter()
 		self.assertEqual(i.splitBlock('M30'), [ [ 'M30' ] ])
@@ -64,6 +59,14 @@ class TestGCodeInterpreter(unittest.TestCase):
 		i.process([ 'M2' ])
 		self.assertEqual(i.end, True)
 
+
+
+class TestRapidMotionG0(unittest.TestCase):
+	def setUp(self):
+		self.i = GCode.GCodeInterpreter()
+		self.i.buffer = []
+		self.i.position = [ 5.000, 0.0, 2.000 ]
+
 	def test_G0_simpleX0(self):
 		self.i.process([ 'G0', 'X0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000' ])
@@ -109,4 +112,13 @@ class TestGCodeInterpreter(unittest.TestCase):
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V2,X10000,Y10000' ])
+
+	def test_G0_simpleZ0(self):
+		self.i.process([ 'G0', 'Z0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V3,Z10000' ])
+
+	def test_G0_simpleZ0Z10(self):
+		self.i.process([ 'G0', 'Z0' ])
+		self.i.process([ 'G0', 'Z10' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V3,Z10000', 'E', 'V3,Z20000' ])
 

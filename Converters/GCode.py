@@ -43,8 +43,9 @@ class GCodeParser:
 			self.sequenceNumbers[int(m.group(1))] = i
 
 class GCodeInterpreter:
+	axes = [ 'X', 'Y', 'Z' ]
 	buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
-	offsets = [ 10.000, 10.000, 2.500 ]
+	offsets = [ 10.000, 10.000, 10.000 ]
 	position = [ 0, 0, 0 ]
 	stretch = 1.0
 	end = False
@@ -121,23 +122,18 @@ class GCodeInterpreter:
 		else:
 			target = self._vectorAdd(move, self.position)
 
-		command = None
+		command = [ None ]
+		dist = 0
 
-		if target[0] != None and target[1] != None:
-			if abs(target[0] - self.position[0]) > abs(target[1] - self.position[1]):
-				command = [ 'V1' ]
-			else:
-				command = [ 'V2' ]
+		for i in xrange(3):
+			if target[i] != None and abs(target[i] - self.position[i]) > dist:
+				command[0] = 'V%d' % (i + 1)
+				dist = abs(target[i] - self.position[i])
 
-		if target[0] != None and target[0] != self.position[0]:
-			if not command: command = [ 'V1' ]
-			command.append('X%d' % (target[0] * 1000))
+			if target[i] != None and target[i] != self.position[i]:
+				command.append('%s%d' % (self.axes[i], target[i] * 1000))
 
-		if target[1] != None and target[1] != self.position[1]:
-			if not command: command = [ 'V2' ]
-			command.append('Y%d' % (target[1] * 1000))
-
-		if not command or len(command) < 2:
+		if len(command) < 2:
 			return
 
 		self.buffer.append('E')
