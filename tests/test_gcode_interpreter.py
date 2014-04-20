@@ -38,3 +38,13 @@ class TestGCodeInterpreter(unittest.TestCase):
 		i = GCode.GCodeInterpreter()
 		i.process([ 'G21' ])
 		self.assertEqual(i.stretch, 1)
+
+	def test_M30(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'M30' ])
+		self.assertEqual(i.end, True)
+
+	def test_M2(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'M2' ])
+		self.assertEqual(i.end, True)

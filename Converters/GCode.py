@@ -46,6 +46,7 @@ class GCodeInterpreter:
 	offset = [ 10000, 10000, 2500 ]
 	position = [ 0, 0, 0 ]
 	stretch = 1.0
+	end = False
 
 	def splitBlock(self, blockStr):
 		instructions = []
@@ -76,3 +77,9 @@ class GCodeInterpreter:
 
 	def processG21(self, insn):  # unit = mm
 		self.stretch = 1.00
+
+	def processM30(self, insn):  # end program
+		self.end = True
+
+	def processM2(self, insn):  # end program
+		self.end = True
