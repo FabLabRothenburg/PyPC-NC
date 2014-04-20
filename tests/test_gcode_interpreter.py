@@ -264,3 +264,17 @@ class TestSimpleCircles(unittest.TestCase):
 			'E', 'V2,X20000,Y25000',
 			'E', 'E', 'C08', 'W10', 'K21,x18794,y6840,p-349044'
 		])
+
+	def test_oneMoreStrangeArc(self):
+		self.i.process([ 'G0', 'X5', 'Y5' ])
+		self.i.process([ 'G2', 'X0', 'Y5', 'R10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X15000,Y15000',
+			# WinPC-NC calculates K21,x-2500,y9682,p-505383 here
+			# I can't figure out where they round one of the values
+			# to get 505383 instead of 505360; using the latter
+			# which is just 0.004% off
+			'E', 'E', 'C08', 'W10', 'K21,x-2500,y9682,p-505360'
+		])
+
