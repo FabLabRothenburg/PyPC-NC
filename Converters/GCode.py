@@ -44,14 +44,18 @@ class GCodeParser:
 
 class GCodeInterpreter:
 	axes = [ 'X', 'Y', 'Z' ]
-	buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
-	offsets = [ 10.000, 10.000, 10.000 ]
-	position = [ 0, 0, 0 ]
-	stretch = 1.0
-	end = False
-	C = 8
-	W = 100
-	absDistanceMode = True
+
+	def __init__(self):
+		self.buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
+		self.offsets = [ 10.000, 10.000, 10.000 ]
+		self.position = [ 0, 0, 0 ]
+		self.incrPosition = [ 10.000, 10.000, 10.000 ]
+		self.stretch = 1.0
+		self.end = False
+		self.C = 8
+		self.W = 100
+		self.absDistanceMode = True
+		self.firstMove = True
 
 	def splitBlock(self, blockStr):
 		instructions = []
@@ -114,18 +118,27 @@ class GCodeInterpreter:
 				return a + b
 		return map(f, a, b)
 
+	def _mergeIntoPosition(self, pos):
+		for i in xrange(3):
+			if(pos[i] != None):
+				self.position[i] = pos[i]
+				self.incrPosition[i] = pos[i]
+
 	def processG0(self, insn):  # rapid motion
 		move = self._readAxes(insn)
 
 		if self.absDistanceMode:
 			target = self._vectorAdd(move, self.offsets)
 		else:
-			target = self._vectorAdd(move, self.position)
+			target = self._vectorAdd(move, self.incrPosition)
 
 		command = [ None ]
 		dist = 0
 
 		for i in xrange(3):
+			if self.firstMove and not self.absDistanceMode and target[i] == None:
+				target[i] = self.incrPosition[i]
+
 			if target[i] != None and abs(target[i] - self.position[i]) > dist:
 				command[0] = 'V%d' % (i + 1)
 				dist = abs(target[i] - self.position[i])
@@ -133,9 +146,11 @@ class GCodeInterpreter:
 			if target[i] != None and target[i] != self.position[i]:
 				command.append('%s%d' % (self.axes[i], target[i] * 1000))
 
+		self.firstMove = False
+
 		if len(command) < 2:
 			return
 
 		self.buffer.append('E')
 		self.buffer.append(','.join(command))
-		self.position = target
+		self._mergeIntoPosition(target)
