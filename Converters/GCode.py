@@ -150,6 +150,9 @@ class GCodeInterpreter:
 			command[0] = 'V21'
 			C = 8
 			W = 10
+
+			if len(command) == 2 and command[1][0] == 'Z':
+				command[1] = command[1].lower()
 		else:
 			C = None
 			W = None

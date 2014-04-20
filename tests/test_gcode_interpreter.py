@@ -159,3 +159,12 @@ class TestCoordinatedMotionG1(unittest.TestCase):
 		self.i.process([ 'G1', 'X0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X10000' ])
 
+	def test_G1_simpleZ0(self):
+		self.i.process([ 'G1', 'Z0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,z10000' ])
+
+	def test_G1_simpleXYZ1(self):
+		self.i.process([ 'G1', 'X1' ])
+		self.i.process([ 'G1', 'Y1' ])
+		self.i.process([ 'G1', 'Z1' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X11000', 'E', 'V21,Y11000', 'E', 'V21,z11000' ])
