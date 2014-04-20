@@ -2,6 +2,11 @@ import unittest
 from Converters import GCode
 
 class TestGCodeInterpreter(unittest.TestCase):
+	def setUp(self):
+		self.i = GCode.GCodeInterpreter()
+		self.i.buffer = []
+		self.i.position = [ 5.000, 0.0, 2.000 ]
+
 	def test_splitBlockSelf(self):
 		i = GCode.GCodeInterpreter()
 		self.assertEqual(i.splitBlock('M30'), [ [ 'M30' ] ])
@@ -39,6 +44,16 @@ class TestGCodeInterpreter(unittest.TestCase):
 		i.process([ 'G21' ])
 		self.assertEqual(i.stretch, 1)
 
+	def test_G90(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'G90' ])
+		self.assertEqual(i.absDistanceMode, True)
+
+	def test_G91(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'G91' ])
+		self.assertEqual(i.absDistanceMode, False)
+
 	def test_M30(self):
 		i = GCode.GCodeInterpreter()
 		i.process([ 'M30' ])
@@ -48,3 +63,34 @@ class TestGCodeInterpreter(unittest.TestCase):
 		i = GCode.GCodeInterpreter()
 		i.process([ 'M2' ])
 		self.assertEqual(i.end, True)
+
+	def test_G0_simpleX0(self):
+		self.i.process([ 'G0', 'X0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000' ])
+
+	def test_G0_simpleX10(self):
+		self.i.process([ 'G0', 'X10' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X20000' ])
+
+	def test_G0_simpleX10X20(self):
+		self.i.process([ 'G0', 'X10' ])
+		self.i.process([ 'G0', 'X20' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X20000', 'E', 'V1,X30000' ])
+
+	def test_G0_simpleY10(self):
+		self.i.process([ 'G0', 'Y10' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V2,Y20000' ])
+
+	def test_G0_simpleY10Y20(self):
+		self.i.process([ 'G0', 'Y10' ])
+		self.i.process([ 'G0', 'Y20' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V2,Y20000', 'E', 'V2,Y30000' ])
+
+	def test_G0_simpleXY0(self):
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V2,X10000,Y10000' ])
+
+	def test_G0_simpleXY0(self):
+		self.i.position = [ 5.000, 9.500, 2.000 ]
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000,Y10000' ])
