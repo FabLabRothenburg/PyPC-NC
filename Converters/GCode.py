@@ -240,6 +240,13 @@ class GCodeInterpreter:
 			xc = x1
 			yc = y1
 
+		else:
+			i = self._getAddress('I', insn)
+			j = self._getAddress('J', insn)
+
+			xc = self.position[0] + float(i) * self.stretch
+			yc = self.position[1] + float(j) * self.stretch
+
 		# a = dist B-C
 		a = math.sqrt((xb - xc) ** 2 + (yb - yc) ** 2)
 		# b = dist C-A
