@@ -1,4 +1,5 @@
 import re
+import math
 
 class GCodeParser:
 	sequenceNumbers = { }
@@ -134,7 +135,6 @@ class GCodeInterpreter:
 
 		command = [ None ]
 		dist = 0
-		twice = False
 
 		for i in xrange(3):
 			if self.firstMove and not self.absDistanceMode and target[i] == None:
@@ -149,11 +149,23 @@ class GCodeInterpreter:
 
 		if not rapid:
 			command[0] = 'V21'
-			C = 8
-			W = 10
-
 			if len(command) == 2 and command[1][0] == 'Z':
 				command[1] = command[1].lower()
+
+		if len(command) < 2:
+			return
+
+		self.buffer.append('E')
+		self._setSpeed(rapid)
+		self.buffer.append(','.join(command))
+		self._mergeIntoPosition(target)
+		self.firstMove = False
+
+	def _setSpeed(self, rapid):
+		twice = False
+		if not rapid:
+			C = 8
+			W = 10
 		else:
 			if self.C == 8 and self.W == 100:
 				# don't change C8 W100, whyever ...
@@ -162,11 +174,6 @@ class GCodeInterpreter:
 				C = 10
 				W = 10
 				twice = True
-
-		if len(command) < 2:
-			return
-
-		self.buffer.append('E')
 
 		if C and (C != self.C or W != self.W):
 			if twice:
@@ -182,12 +189,66 @@ class GCodeInterpreter:
 			self.C = C
 			self.W = W
 
-		self.buffer.append(','.join(command))
-		self._mergeIntoPosition(target)
-		self.firstMove = False
+
+
 
 	def processG0(self, insn):  # rapid motion
 		self._straightMotion(insn, True)
 
 	def processG1(self, insn):  # coordinated motion
 		self._straightMotion(insn, False)
+
+	def _getAddress(self, word, insn):
+		for i in insn:
+			if i[0] == word:
+				return i[1:]
+
+	def processG2(self, insn):  # CW circle
+		move = self._readAxes(insn)
+		radius = self._getAddress('R', insn)
+
+		if self.absDistanceMode:
+			target = self._vectorAdd(move, self.offsets)
+		else:
+			target = self._vectorAdd(move, self.incrPosition)
+
+		xa = self.position[0]
+		ya = self.position[1]
+		xb = target[0]
+		yb = target[1]
+
+		if radius:
+			#
+			# calculate potential center coords for circle
+			# http://www.fachinformatiker.de/algorithmik/70902-kreismittelpunkt-berechnen.html
+			#
+			r = float(radius) ** 2
+
+			a = -((-2 * ya) - (-2 * yb)) / ((-2 * xa) - (-2 * xb))
+			b = -((xa * xa + ya * ya - r) - (xb * xb + yb * yb - r)) / ((-2 * xa) - (-2 * xb));
+			p = (-2 * (xa - b) * a - 2 * ya) / (a * a + 1);
+			q = ((xa - b) * (xa - b) + ya * ya - r) / (a * a + 1);
+			y1 = -p / 2 + math.sqrt((p * p) / 4 - q);
+			y2 = -p / 2 - math.sqrt((p * p) / 4 - q);
+			x1 = a * y1 + b;
+			x2 = a * y2 + b;
+
+			# @fixme which one to pick!?
+			xc = x1
+			yc = y1
+
+		# a = dist B-C
+		a = math.sqrt((xb - xc) ** 2 + (yb - yc) ** 2)
+		# b = dist C-A
+		b = math.sqrt((xc - xa) ** 2 + (yc - ya) ** 2)
+		# c = dist A-B
+		c = math.sqrt((xa - xb) ** 2 + (ya - yb) ** 2)
+
+		# law of cosine
+		gamma = math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))
+
+		self.buffer.append('E')
+		self._setSpeed(False)  # always "slow" motion
+		self.buffer.append('K21,x%d,y%d,p%d' % ((xc - xa) * 1000, (yc - ya) * 1000, gamma * -1000000))
+		self._mergeIntoPosition(target)
+		self.firstMove = False
