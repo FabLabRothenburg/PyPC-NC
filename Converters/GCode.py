@@ -41,3 +41,38 @@ class GCodeParser:
 
 			self.lines[i] = self.lines[i][m.end():]
 			self.sequenceNumbers[int(m.group(1))] = i
+
+class GCodeInterpreter:
+	offset = [ 10000, 10000, 2500 ]
+	position = [ 0, 0, 0 ]
+	stretch = 1.0
+
+	def splitBlock(self, blockStr):
+		instructions = []
+		cur = []
+
+		for i in blockStr.split(' '):
+			if i == '': continue
+
+			if cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
+				cur.append(i)
+			elif i[0] in [ 'G', 'M', 'F', 'S', 'T' ]:
+				if cur: instructions.append(cur)
+				cur = [i]
+			else:
+				cur.append(i)
+
+		if cur: instructions.append(cur)
+		return instructions
+
+	def process(self, insn):
+		try:
+			getattr(self, 'process%s' % insn[0])(insn)
+		except AttributeError:
+			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
+
+	def processG20(self, insn):  # unit = inch
+		self.stretch = 2.54
+
+	def processG21(self, insn):  # unit = mm
+		self.stretch = 1.00
