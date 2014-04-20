@@ -129,14 +129,17 @@ class GCodeInterpreter:
 			else:
 				command = [ 'V2' ]
 
-		if target[0] != None:
+		if target[0] != None and target[0] != self.position[0]:
 			if not command: command = [ 'V1' ]
 			command.append('X%d' % (target[0] * 1000))
 
-		if target[1] != None:
+		if target[1] != None and target[1] != self.position[1]:
 			if not command: command = [ 'V2' ]
 			command.append('Y%d' % (target[1] * 1000))
 
+		if not command or len(command) < 2:
+			return
+
 		self.buffer.append('E')
 		self.buffer.append(','.join(command))
-
+		self.position = target

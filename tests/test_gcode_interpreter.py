@@ -94,3 +94,19 @@ class TestGCodeInterpreter(unittest.TestCase):
 		self.i.position = [ 5.000, 9.500, 2.000 ]
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000,Y10000' ])
+
+	def test_G0_simpleX0_repeat(self):
+		self.i.process([ 'G0', 'X0' ])
+		self.i.process([ 'G0', 'X0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000' ])
+
+	def test_G0_simpleY10_repeat(self):
+		self.i.process([ 'G0', 'Y10' ])
+		self.i.process([ 'G0', 'Y10' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V2,Y20000' ])
+
+	def test_G0_simpleXY0_repeat(self):
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V2,X10000,Y10000' ])
+
