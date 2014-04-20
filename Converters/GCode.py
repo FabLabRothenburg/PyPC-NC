@@ -271,15 +271,11 @@ class GCodeInterpreter:
 		if not radius:
 			# if the center of the circle is specified directly,
 			# the angle gamma may be larger than 180 deg;
-			alpha = math.acos((xa - xc) / a)
-			if xa < xc: alpha -= math.pi
-			if alpha < -math.pi: alpha += math.pi * 2
+			alpha = self.angleCalcCW((xa - xc) / a, (ya - yc) / a)
+			beta = self.angleCalcCW((xb - xc) / a, (yb - yc) / a)
 
-			beta = math.acos((xb - xc) / a)
-			if xb < xc: beta -= math.pi
-			if beta < -math.pi: beta += math.pi * 2
-
-			if beta < alpha: gamma += math.pi
+			if beta < alpha: beta += math.pi * 2
+			if beta - alpha >= math.pi: gamma += math.pi
 
 		x = round((xc - xa) * 1000)
 		y = round((yc - ya) * 1000)
@@ -289,3 +285,9 @@ class GCodeInterpreter:
 		self.buffer.append('K21,x%d,y%d,p%d' % (x, y, gamma * -1000000))
 		self._mergeIntoPosition(target)
 		self.firstMove = False
+
+	def angleCalcCW(self, x, y):
+		alpha = math.acos(x)
+		if y > 0: alpha = 2 * math.pi - alpha
+
+		return alpha

@@ -1,3 +1,4 @@
+import math
 import unittest
 from Converters import GCode
 
@@ -296,7 +297,8 @@ class TestSimpleCircles(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p-1570796'
 		])
 
-	def test_basicThreeQuarterCircleCenterFormatJustJ(self):
+
+	def test_basicThreeQuarterCircle1(self):
 		self.i.process([ 'G0', 'X10', 'Y15' ])
 		self.i.process([ 'G2', 'X-10', 'Y-5', 'J-20' ])
 
@@ -305,3 +307,45 @@ class TestSimpleCircles(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x0,y-20000,p-4712388'
 		])
 
+	def test_basicThreeQuarterCircle2(self):
+		self.i.process([ 'G0', 'X10', 'Y0' ])
+		self.i.process([ 'G2', 'X0', 'Y10', 'I-10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X20000,Y10000',
+			'E', 'E', 'C08', 'W10', 'K21,x-10000,y0,p-4712388'
+		])
+
+
+class TestAngleCalcCW(unittest.TestCase):
+	def test_angleCalcCW_0(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCW(1, 0), 0)
+
+	def test_angleCalcCW_4thPI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCW(math.cos(-math.pi / 4), math.sin(-math.pi / 4)), math.pi / 4)
+
+	def test_angleCalcCW_HalfPI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCW(math.cos(-math.pi / 2), math.sin(-math.pi / 2)), math.pi / 2)
+
+	def test_angleCalcCW_4thPI3(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 6), round(math.pi / 4 * 3, 6))
+
+	def test_angleCalcCW_PI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi), math.sin(math.pi)), 6), round(math.pi, 6))
+
+	def test_angleCalcCW_4thPI5(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 6), round(math.pi / 4 * 5, 6))
+
+	def test_angleCalcCW_HalfPI3(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCW(math.cos(math.pi / 2), math.sin(math.pi / 2)), math.pi / 2 * 3)
+
+	def test_angleCalcCW_4thPI7(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), 6), round(math.pi / 4 * 7, 6))
