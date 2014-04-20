@@ -295,3 +295,13 @@ class TestSimpleCircles(unittest.TestCase):
 			'E', 'V2,X20000,Y25000',
 			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p-1570796'
 		])
+
+	def test_basicThreeQuarterCircleCenterFormatJustJ(self):
+		self.i.process([ 'G0', 'X10', 'Y15' ])
+		self.i.process([ 'G2', 'X-10', 'Y-5', 'J-20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X20000,Y25000',
+			'E', 'E', 'C08', 'W10', 'K21,x0,y-20000,p-4712388'
+		])
+

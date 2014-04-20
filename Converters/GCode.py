@@ -258,11 +258,28 @@ class GCodeInterpreter:
 		a = math.sqrt((xb - xc) ** 2 + (yb - yc) ** 2)
 		# b = dist C-A
 		b = math.sqrt((xc - xa) ** 2 + (yc - ya) ** 2)
+
+		if round(a - b, 3) != 0:
+			raise RuntimeError('strange circle a=%f, b=%f', a, b)
+
 		# c = dist A-B
 		c = math.sqrt((xa - xb) ** 2 + (ya - yb) ** 2)
 
 		# law of cosine
 		gamma = math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))
+
+		if not radius:
+			# if the center of the circle is specified directly,
+			# the angle gamma may be larger than 180 deg;
+			alpha = math.acos((xa - xc) / a)
+			if xa < xc: alpha -= math.pi
+			if alpha < -math.pi: alpha += math.pi * 2
+
+			beta = math.acos((xb - xc) / a)
+			if xb < xc: beta -= math.pi
+			if beta < -math.pi: beta += math.pi * 2
+
+			if beta < alpha: gamma += math.pi
 
 		x = round((xc - xa) * 1000)
 		y = round((yc - ya) * 1000)
