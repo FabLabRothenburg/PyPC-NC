@@ -122,6 +122,14 @@ class TestRapidMotionG0(unittest.TestCase):
 		self.i.process([ 'G0', 'Z10' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V3,Z10000', 'E', 'V3,Z20000' ])
 
+	def test_G0_incrXXX(self):
+		self.i.process([ 'G0', 'X0' ])
+		self.i.process([ 'G91' ])
+		self.i.process([ 'G0', 'X5' ])
+		self.i.process([ 'G0', 'X5' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000', 'E', 'V1,X15000', 'E', 'V1,X20000' ])
+
+
 class WriteZOnFirstMove(unittest.TestCase):
 	def setUp(self):
 		self.i = GCode.GCodeInterpreter()
