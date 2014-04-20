@@ -1,6 +1,8 @@
 import re
 
 class GCodeParser:
+	sequenceNumbers = { }
+
 	def readString(self, string):
 		self.lines = string.split('\n')
 		while self.lines and self.lines[0] == '':
@@ -32,3 +34,10 @@ class GCodeParser:
 			return re.sub(r'\b([A-Z])\s*([0-9.-]+)\b', '\\1\\2', x)
 		self.lines = map(f, self.lines)
 
+	def readSequenceNumbers(self):
+		for i in xrange(0, len(self.lines)):
+			m = re.match(r'\s*N(\d+)\s*', self.lines[i])
+			if not m: continue
+
+			self.lines[i] = self.lines[i][m.end():]
+			self.sequenceNumbers[int(m.group(1))] = i

@@ -69,3 +69,19 @@ N100 G00 X0 Y0 Z0 (Rapid to Part Zero)
 			'N100 G00 X0 Y0 Z0',
 		])
 
+	def test_readSequenceNumbers(self):
+		parser = GCode.GCodeParser()
+		parser.lines = [
+			'O1000',
+			'N50 G00 X0 Y0 Z0',
+			'G00 X0 Y0 Z0',
+			'N100 G00 X0 Y0 Z0',
+		]
+		parser.readSequenceNumbers()
+		self.assertEqual(parser.lines, [
+			'O1000',
+			'G00 X0 Y0 Z0',
+			'G00 X0 Y0 Z0',
+			'G00 X0 Y0 Z0',
+		])
+		self.assertEqual(parser.sequenceNumbers, { 50: 1, 100: 3 })
