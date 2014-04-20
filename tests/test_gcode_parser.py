@@ -56,3 +56,16 @@ N100 G00 X0 Y0 Z0 (Rapid to Part Zero)
 		self.assertEqual(parser.lines, [
 			'N100 G00 X0 Y0 Z0 (Rapid to Part Zero)',
 		])
+
+	def test_normalizeAddressWhitespace(self):
+		parser = GCode.GCodeParser()
+		parser.lines = [
+			'O1000',
+			'N 100 G\t00 X	0 Y   0 Z0',
+		]
+		parser.normalizeAddressWhitespace()
+		self.assertEqual(parser.lines, [
+			'O1000',
+			'N100 G00 X0 Y0 Z0',
+		])
+

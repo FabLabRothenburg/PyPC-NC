@@ -26,3 +26,9 @@ class GCodeParser:
 		def f(x):
 			return x.strip()[0] != '/'
 		self.lines = filter(f, self.lines)
+
+	def normalizeAddressWhitespace(self):
+		def f(x):
+			return re.sub(r'\b([A-Z])\s*([0-9.-]+)\b', '\\1\\2', x)
+		self.lines = map(f, self.lines)
+
