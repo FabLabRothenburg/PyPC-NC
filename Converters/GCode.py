@@ -11,6 +11,20 @@ class GCodeParser:
 		while self.lines and self.lines[-1] == '':
 			self.lines.pop()
 
+	def readFile(self, fname):
+		with open(fname) as f:
+			self.lines = f.readlines()
+
+		# trim lines
+		def f(x):
+			return x.strip()
+		self.lines = map(f, self.lines)
+
+		# filter empty lines
+		def f(x):
+			return len(x) > 0
+		self.lines = filter(f, self.lines)
+
 	def removeTapeMarkers(self):
 		if self.lines and self.lines[0][0] == '%':
 			self.lines.pop(0)
@@ -27,7 +41,8 @@ class GCodeParser:
 
 	def removeBlockSkipLines(self):
 		def f(x):
-			return x.strip()[0] != '/'
+			x = x.strip()
+			return len(x) and x[0] != '/'
 		self.lines = filter(f, self.lines)
 
 	def normalizeAddressWhitespace(self):
@@ -59,6 +74,23 @@ class GCodeInterpreter:
 		self.firstMove = True
 		self.parameters = { }
 
+	def run(self, parser):
+		currentBlock = 0
+
+		while not self.end:
+			blockStr = parser.lines[currentBlock]
+
+			if self.readParameters(blockStr):
+				print self.parameters
+				currentBlock += 1
+				continue
+
+			commands = self.splitBlock(blockStr)
+
+			for command in commands:
+				self.process(command)
+			break
+
 	def splitBlock(self, blockStr):
 		instructions = []
 		cur = []
@@ -87,9 +119,10 @@ class GCodeInterpreter:
 			raise RuntimeError('Parameter #%d is not writeable' % key)
 
 		self.parameters[key] = self.evalExpression(m.group(2))
+		return True
 
 	def evalExpression(self, expr):
-		m = re.match(r'[0-9\.]+$', expr)
+		m = re.match(r'-?[0-9\.]+$', expr)
 		if not m:
 			raise RuntimeError('Unsupported expression: %s' % expr)
 		return float(expr)
