@@ -215,7 +215,7 @@ class TestG0G1Switching(unittest.TestCase):
 			'E', 'V1,X10000,Y10000',
 		])
 
-class TestSimpleCircles(unittest.TestCase):
+class TestCirclesCW(unittest.TestCase):
 	def setUp(self):
 		self.i = GCode.GCodeInterpreter()
 		self.i.buffer = []
@@ -314,6 +314,24 @@ class TestSimpleCircles(unittest.TestCase):
 		self.assertEqual(self.i.buffer, [
 			'E', 'V1,X20000,Y10000',
 			'E', 'E', 'C08', 'W10', 'K21,x-10000,y0,p-4712388'
+		])
+
+	def test_basicThreeQuarterCircle3(self):
+		self.i.process([ 'G0', 'X0', 'Y-10' ])
+		self.i.process([ 'G2', 'X10', 'Y0', 'J10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X10000,Y0',
+			'E', 'E', 'C08', 'W10', 'K21,x0,y10000,p-4712388'
+		])
+
+	def test_basicThreeQuarterCircle4(self):
+		self.i.process([ 'G0', 'X-10', 'Y0' ])
+		self.i.process([ 'G2', 'X0', 'Y-10', 'I10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X0,Y10000',
+			'E', 'E', 'C08', 'W10', 'K21,x10000,y0,p-4712388'
 		])
 
 
