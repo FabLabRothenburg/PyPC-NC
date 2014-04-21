@@ -209,6 +209,22 @@ class GCodeInterpreter:
 	def processG3(self, insn):  # CCW circle
 		self._circleMotion(insn, self.angleCalcCCW, True)
 
+	def _calcInnerAngle(self, xa, ya, xb, yb, xc, yc, fAngle):
+		# a = dist B-C
+		a = math.sqrt((xb - xc) ** 2 + (yb - yc) ** 2)
+		# b = dist C-A
+		b = math.sqrt((xc - xa) ** 2 + (yc - ya) ** 2)
+
+		if round(a - b, 3) != 0:
+			raise RuntimeError('strange circle a=%f, b=%f', a, b)
+
+		alpha = fAngle((xa - xc) / a, (ya - yc) / a)
+		beta = fAngle((xb - xc) / a, (yb - yc) / a)
+
+		if beta < alpha: beta += math.pi * 2
+
+		return beta - alpha
+
 	def _circleMotion(self, insn, fAngle, ccw):
 		move = self._readAxes(insn)
 		radius = self._getAddress('R', insn)
@@ -242,9 +258,12 @@ class GCodeInterpreter:
 			x1 = a * y1 + b;
 			x2 = a * y2 + b;
 
-			# @fixme which one to pick!?
-			xc = x1
-			yc = y1
+			if self._calcInnerAngle(xa, ya, xb, yb, x1, y1, fAngle) < self._calcInnerAngle(xa, ya, xb, yb, x2, y2, fAngle):
+				xc = x1
+				yc = y1
+			else:
+				xc = x2
+				yc = y2
 
 		else:
 			i = self._getAddress('I', insn)
