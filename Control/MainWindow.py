@@ -67,6 +67,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 				return
 
 		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
+		if filename[0] == '': return
+
 		self._status.importGCode(filename[0])
 
 	@QtCore.Slot()
