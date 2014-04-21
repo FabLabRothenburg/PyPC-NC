@@ -4,6 +4,8 @@ from PySide import QtGui, QtCore
 from Control.MachineStatus import ControlMachineStatus
 
 class ControlMainWindow(QtGui.QMainWindow):
+	storeButtonUsed = False
+
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
 
@@ -17,8 +19,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
 		self._ui.importGCode.clicked.connect(self.importGCode)
 
-		self._ui.storeXY.clicked.connect(self._status.storeXY)
-		self._ui.storeXYZ.clicked.connect(self._status.storeXYZ)
+		self._ui.storeXY.clicked.connect(self.storeXY)
+		self._ui.storeXYZ.clicked.connect(self.storeXYZ)
 		self._ui.gotoXY.clicked.connect(self.gotoXY)
 		self._ui.gotoXYZ.clicked.connect(self.gotoXYZ)
 
@@ -66,10 +68,28 @@ class ControlMainWindow(QtGui.QMainWindow):
 			if reply == QtGui.QMessageBox.No:
 				return
 
+		if not self.storeButtonUsed:
+		        reply = QtGui.QMessageBox.question(self, 'G-Code Import',
+			            'Are you sure to import G-Code without setting workpiece location?',
+				    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+			if reply == QtGui.QMessageBox.No:
+				return
+
 		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
 		if filename[0] == '': return
 
 		self._status.importGCode(filename[0])
+
+	@QtCore.Slot()
+	def storeXY(self):
+		self.storeButtonUsed = True
+		self._status.storeXY()
+
+	@QtCore.Slot()
+	def storeXYZ(self):
+		self.storeButtonUsed = True
+		self._status.storeXYZ()
 
 	@QtCore.Slot()
 	def gotoXY(self):
