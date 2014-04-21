@@ -262,7 +262,6 @@ class MockMachine:
 		#
 		# programmed movement
 		#
-		"@N0":			"",
 		"@M2":			"",
 		"C08":			None,
 		"D141":			None,
@@ -329,6 +328,11 @@ class MockMachine:
 			return ''
 
 		if command == '@@':  # reset ??
+			return ''
+
+		if command == '@N0':
+			self._planSteps = 0
+			self._curStep = 0
 			return ''
 
 		# $HZXY
