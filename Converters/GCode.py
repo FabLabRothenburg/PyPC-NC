@@ -320,8 +320,6 @@ class GCodeInterpreter:
 
 		if not rapid:
 			command[0] = 'V21'
-			if len(command) == 2 and command[1][0] == 'Z':
-				command[1] = command[1].lower()
 
 		if len(command) < 2:
 			return
