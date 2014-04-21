@@ -158,6 +158,10 @@ class GCodeInterpreter:
 	def processG21(self, insn):  # unit = mm
 		self.stretch = 1.00
 
+	def processG64(self, insn):  # path blending
+		# not supported, i.e. also not handled by WinPC-NC
+		pass
+
 	def processG90(self, insn):  # absolute distance mode
 		self.absDistanceMode = True
 
