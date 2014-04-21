@@ -417,3 +417,11 @@ class TestCirclesCCW(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x10000,y0,p1570797'
 		])
 
+	def test_basicHalfCircle(self):
+		self.i.process([ 'G0', 'X10', 'Y15' ])
+		self.i.process([ 'G3', 'X-30', 'Y15', 'R20' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V2,X20000,Y25000',
+			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p3141593'
+		])
