@@ -175,7 +175,7 @@ class GCodeInterpreter:
 		self.plane = 'YZ'
 
 	def processG20(self, insn):  # unit = inch
-		self.stretch = 2.54
+		self.stretch = 25.4
 
 	def processG21(self, insn):  # unit = mm
 		self.stretch = 1.00
