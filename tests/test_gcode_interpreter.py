@@ -61,6 +61,20 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'M2' ])
 		self.assertEqual(i.end, True)
 
+	def test_G17(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'G17' ])
+		self.assertEqual(i.plane, 'XY')
+
+	def test_G18(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'G18' ])
+		self.assertEqual(i.plane, 'XZ')
+
+	def test_G19(self):
+		i = GCode.GCodeInterpreter()
+		i.process([ 'G19' ])
+		self.assertEqual(i.plane, 'YZ')
 
 
 class TestRapidMotionG0(unittest.TestCase):

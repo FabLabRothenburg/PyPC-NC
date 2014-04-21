@@ -73,6 +73,7 @@ class GCodeInterpreter:
 		self.absDistanceMode = True
 		self.firstMove = True
 		self.parameters = { }
+		self.plane = 'XY'
 
 	def run(self, parser):
 		currentBlock = 0
@@ -141,6 +142,15 @@ class GCodeInterpreter:
 			getattr(self, 'process%s' % insn[0])(insn)
 		except AttributeError:
 			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
+
+	def processG17(self, insn):  # plane = XY
+		self.plane = 'XY'
+
+	def processG18(self, insn):  # plane = XZ
+		self.plane = 'XZ'
+
+	def processG19(self, insn):  # plane = YZ
+		self.plane = 'YZ'
 
 	def processG20(self, insn):  # unit = inch
 		self.stretch = 2.54
