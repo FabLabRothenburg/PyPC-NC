@@ -1,4 +1,5 @@
 from PySide import QtGui, QtCore
+from Converters import GCode
 
 class ControlMachineStatus(QtCore.QObject):
 	status = None
@@ -184,3 +185,46 @@ class ControlMachineStatus(QtCore.QObject):
 
 		setattr(self, 'moving' + axis, True)
 
+	def importGCode(self, fname):
+		print fname
+		parser = GCode.GCodeParser()
+		parser.readFile(fname)
+		parser.removeTapeMarkers()
+		parser.removeInlineComments()
+		parser.removeBlockSkipLines()
+		parser.normalizeAddressWhitespace()
+		parser.readSequenceNumbers()
+
+		inter = GCode.GCodeInterpreter()
+		inter.offsets = [ self.wpX, self.wpY, self.wpZ ]
+		inter.position = [ self.pX, self.pY, self.pZ ]
+		inter.incrPosition = [ self.wpX, self.wpY, self.wpZ ]
+		inter.run(parser)
+
+		commands = [
+			'@M0',
+			'#G11,5000',
+			'#E21,5000,30',
+			'#E41,10000,30',
+			'#G31,10000',
+			'#G1,15000',
+			'#G4,3000',
+			'#G2,15000',
+			'#G5,3000',
+			'#G3,10000',
+			'#G6,2000',
+			'#G7,10000',
+			'#G8,2000',
+			'#C2,9',
+			'#C14,17',
+			'#C43,1',
+			'@N0',
+			'@M2',
+		]
+		for command in commands:
+			self.cts()
+			self._chatBackend.send(command, '')
+
+		for command in inter.buffer:
+			self.cts()
+			self._chatBackend.send(command)

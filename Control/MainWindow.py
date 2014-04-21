@@ -15,6 +15,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		self._ui.stop.clicked.connect(self._status.stop)
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
+		self._ui.importGCode.clicked.connect(self.importGCode)
+
 		self._ui.storeXY.clicked.connect(self._status.storeXY)
 		self._ui.storeXYZ.clicked.connect(self._status.storeXYZ)
 		self._ui.gotoXY.clicked.connect(self.gotoXY)
@@ -53,6 +55,12 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.relX.setText("%.3f" % ((self._status.wpX - self._status.pX) / 1000))
 		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
 		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
+
+	@QtCore.Slot()
+	def importGCode(self):
+		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
+		print filename[0]
+		self._status.importGCode(filename[0])
 
 	@QtCore.Slot()
 	def gotoXY(self):
