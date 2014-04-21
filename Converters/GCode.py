@@ -168,10 +168,17 @@ class GCodeInterpreter:
 	def processG91(self, insn):  # incremental distance mode
 		self.absDistanceMode = False
 
-	def processM30(self, insn):  # end program
+	def processM2(self, insn):  # end program
 		self.end = True
 
-	def processM2(self, insn):  # end program
+	def processM3(self, insn):  # start spindle clockwise
+		self.buffer.append('E')
+		self.buffer.append('W%d' % self.W)
+		self.buffer.append('E')
+		self.buffer.append('D42')
+		self.buffer.append('W%d' % self.W)
+
+	def processM30(self, insn):  # end program
 		self.end = True
 
 	def _readAxes(self, insn):

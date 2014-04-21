@@ -76,6 +76,12 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'G19' ])
 		self.assertEqual(i.plane, 'YZ')
 
+	def test_M3(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M3', 'S3000' ])
+		self.assertEqual(i.buffer, [ 'E', 'W100', 'E', 'D42', 'W100' ])
+
 
 class TestRapidMotionG0(unittest.TestCase):
 	def setUp(self):

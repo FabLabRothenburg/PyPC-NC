@@ -274,6 +274,7 @@ class MockMachine:
 		"W10":			None,
 		"C10":			None,
 		"D0":			None,
+		"D42":			None, # M3 S3000
 
 		"Q100,0":		None,
 		"Q101,0":		None,
