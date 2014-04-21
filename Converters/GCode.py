@@ -77,6 +77,7 @@ class GCodeInterpreter:
 		self.plane = 'XY'
 		self.spindleEnable = True
 		self.spindleCCW = False
+		self.initialW100Stickyness = True
 
 	def run(self, parser):
 		currentBlock = 0
@@ -92,6 +93,7 @@ class GCodeInterpreter:
 			commands = self.splitBlock(blockStr)
 
 			for command in commands:
+				print command
 				self.process(command)
 			break
 
@@ -184,7 +186,10 @@ class GCodeInterpreter:
 		self._setSpindleSpeed(insn, None, False)
 
 	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
-		self.W = 100
+		# spindle speed setting of WinPC-NC writes W100 lines, however
+		# the global W-state doesn't seem to be modified, at least
+		# sub-sequent motions don't change W to the wanted value.
+		#self.W = 100
 		speed = None
 
 		if spindleEnable:
@@ -213,7 +218,7 @@ class GCodeInterpreter:
 		self.spindleEnable = spindleEnable
 		if not spindleEnable: return
 
-		self.buffer.append('W%d' % self.W)
+		self.buffer.append('W100')
 
 		if not speed: return
 
@@ -223,7 +228,7 @@ class GCodeInterpreter:
 		self.D = D
 
 		self.buffer.append('D%d' % self.D)
-		self.buffer.append('W%d' % self.W)
+		self.buffer.append('W100')
 
 	def processM30(self, insn):  # end program
 		self.end = True
@@ -294,16 +299,17 @@ class GCodeInterpreter:
 		if not rapid:
 			C = 8
 			W = 10
+			self.initialW100Stickyness = False
 		else:
-			if self.C == 8 and self.W == 100:
+			if self.C == 8 and self.W == 100 and self.initialW100Stickyness:
 				# don't change C8 W100, whyever ...
-				C = None
+				return
 			else:
 				C = 10
 				W = 10
 				twice = True
 
-		if C and (C != self.C or W != self.W):
+		if C != self.C or W != self.W:
 			if twice:
 				self.buffer.append('C%02d' % C)
 				self.buffer.append('W%d' % W)

@@ -157,6 +157,89 @@ class TestInterpreterBasics(unittest.TestCase):
 		])
 
 
+	def test_M3_W100_behaviour_G0(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.position = [ 0, 0, 0 ]
+		i.offsets = [ 30, 30, 10 ]
+		i.process([ 'G0', 'X0', 'Y0' ])
+		i.process([ 'M3', 'S5000' ])
+		i.process([ 'G0', 'X1' ])
+		i.process([ 'G1', 'X2' ])
+		i.process([ 'G0', 'X3' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'V1,X30000,Y30000',
+			'E', 'E', 'W100', 'E', 'D71', 'W100',  # WinPC-NC uses D70
+			'E', 'V1,X31000',
+			'E', 'E', 'C08', 'W10', 'V21,X32000',
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X33000',
+		])
+
+	def test_M3_W100_behaviour_G1G0G1G0(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.position = [ 0, 0, 0 ]
+		i.offsets = [ 30, 30, 10 ]
+		i.process([ 'G1', 'X0', 'Y0' ])
+		i.process([ 'M3', 'S5000' ])
+		i.process([ 'G0', 'X1' ])
+		i.process([ 'G1', 'X2' ])
+		i.process([ 'G0', 'X3' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'C08', 'W10', 'V21,X30000,Y30000',
+			'E', 'E', 'W100', 'E', 'D71', 'W100',  # WinPC-NC uses D70
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X31000',
+			'E', 'E', 'C08', 'W10', 'V21,X32000',
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X33000',
+		])
+
+	def test_M3_W100_behaviour_G0G1G1G0G1(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.position = [ 0, 0, 0 ]
+		i.offsets = [ 30, 30, 10 ]
+		i.process([ 'G0', 'X0', 'Y0' ])
+		i.process([ 'M3', 'S5000' ])
+		i.process([ 'G1', 'X1' ])
+		i.process([ 'G1', 'Y1' ])
+		i.process([ 'G0', 'X2' ])
+		i.process([ 'G1', 'X3' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'V1,X30000,Y30000',
+			'E', 'E', 'W100', 'E', 'D71', 'W100',  # WinPC-NC uses D70
+			'E', 'E', 'C08', 'W10', 'V21,X31000',
+			'E', 'V21,Y31000',
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X32000',
+			'E', 'E', 'C08', 'W10', 'V21,X33000',
+		])
+
+
+	def test_M3_W100_behaviour_G0G1M3G1G0G1(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.position = [ 0, 0, 0 ]
+		i.offsets = [ 30, 30, 10 ]
+		i.process([ 'G0', 'X0', 'Y0' ])
+		i.process([ 'M3', 'S5000' ])
+		i.process([ 'G1', 'X1' ])
+		i.process([ 'M3', 'S7000' ])
+		i.process([ 'G1', 'Y1' ])
+		i.process([ 'G0', 'X2' ])
+		i.process([ 'G1', 'X3' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'V1,X30000,Y30000',
+			'E', 'E', 'W100', 'E', 'D71', 'W100',  # WinPC-NC uses D70
+			'E', 'E', 'C08', 'W10', 'V21,X31000',
+			'E', 'E', 'W100', 'E', 'D99', 'W100',
+			'E', 'V21,Y31000',
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V1,X32000',
+			'E', 'E', 'C08', 'W10', 'V21,X33000',
+		])
+
 
 
 
