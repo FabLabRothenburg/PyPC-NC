@@ -186,7 +186,6 @@ class ControlMachineStatus(QtCore.QObject):
 		setattr(self, 'moving' + axis, True)
 
 	def importGCode(self, fname):
-		print fname
 		parser = GCode.GCodeParser()
 		parser.readFile(fname)
 		parser.removeTapeMarkers()
@@ -196,9 +195,9 @@ class ControlMachineStatus(QtCore.QObject):
 		parser.readSequenceNumbers()
 
 		inter = GCode.GCodeInterpreter()
-		inter.offsets = [ self.wpX, self.wpY, self.wpZ ]
-		inter.position = [ self.pX, self.pY, self.pZ ]
-		inter.incrPosition = [ self.wpX, self.wpY, self.wpZ ]
+		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
+		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
+		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
 		inter.run(parser)
 
 		commands = [
