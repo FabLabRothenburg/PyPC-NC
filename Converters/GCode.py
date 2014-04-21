@@ -81,22 +81,23 @@ class GCodeInterpreter:
 		self.coolantEnable = False
 
 	def run(self, parser):
-		currentBlock = 0
+		currentBlock = -1
 
 		while not self.end:
+			currentBlock += 1
 			blockStr = parser.lines[currentBlock]
 
 			if self.readParameters(blockStr):
-				print self.parameters
-				currentBlock += 1
 				continue
 
+			blockStr = self.substituteParameters(blockStr)
 			commands = self.splitBlock(blockStr)
 
 			for command in commands:
-				print command
 				self.process(command)
-			break
+
+		self.buffer.append('E')
+		self.buffer.append('D0')
 
 	def splitBlock(self, blockStr):
 		instructions = []
@@ -140,7 +141,13 @@ class GCodeInterpreter:
 			if not m: break
 
 			key = int(m.group(1))
-			blockStr = blockStr[:m.start()] + str(self.parameters[key]) + blockStr[m.end():]
+
+			if int(self.parameters[key]) == float(self.parameters[key]):
+				subst = '%d' % (self.parameters[key])
+			else:
+				subst = '%f' % (self.parameters[key])
+
+			blockStr = blockStr[:m.start()] + subst + blockStr[m.end():]
 		return blockStr
 
 	def process(self, insn):
@@ -309,7 +316,7 @@ class GCodeInterpreter:
 				dist = abs(target[i] - self.position[i])
 
 			if target[i] != None and target[i] != self.position[i]:
-				command.append('%s%d' % (self.axes[i], target[i] * 1000))
+				command.append('%s%d' % (self.axes[i], round(target[i] * 1000)))
 
 		if not rapid:
 			command[0] = 'V21'

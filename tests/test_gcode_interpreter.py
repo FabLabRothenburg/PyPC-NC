@@ -753,7 +753,7 @@ class TestParameterizedProgramming(unittest.TestCase):
 		i = GCode.GCodeInterpreter()
 		i.parameters[100] = 0.002
 		r = i.substituteParameters('G0 Z#100')
-		self.assertEqual(r, 'G0 Z0.002')
+		self.assertEqual(r, 'G0 Z0.002000')
 
 	def test_parameterSubstitutionMulti(self):
 		i = GCode.GCodeInterpreter()

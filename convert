@@ -17,7 +17,11 @@ def main():
 		parser.readSequenceNumbers()
 
 		inter = GCode.GCodeInterpreter()
+		inter.offsets = [ 30, 30, 10 ]
 		inter.run(parser)
+
+		for line in inter.buffer:
+			print line
 
 if __name__ == "__main__":
 	main()
