@@ -264,7 +264,6 @@ class MockMachine:
 		#
 		"@M2":			"",
 		"C08":			None,
-		"D141":			None,
 		"A10":			None,
 		"A40":			None,
 		"A50":			None,
@@ -273,8 +272,6 @@ class MockMachine:
 		"W100":			None,
 		"W10":			None,
 		"C10":			None,
-		"D0":			None,
-		"D42":			None, # M3 S3000
 
 		"Q100,0":		None,
 		"Q101,0":		None,
@@ -425,6 +422,9 @@ class MockMachine:
 			else:
 				self._status &= 0xEF
 			return reply
+
+		if command[0] == 'D':  # set spindle speed; M3 S3000 -> D42
+			return None
 
 		if command == 'A50':
 			self._status |= 1
