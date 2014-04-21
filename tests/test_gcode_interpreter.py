@@ -367,3 +367,53 @@ class TestAngleCalcCW(unittest.TestCase):
 	def test_angleCalcCW_4thPI7(self):
 		i = GCode.GCodeInterpreter()
 		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), 6), round(math.pi / 4 * 7, 6))
+
+class TestAngleCalcCCW(unittest.TestCase):
+	def test_angleCalcCCW_0(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCCW(1, 0), 0)
+
+	def test_angleCalcCCW_4thPI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), math.pi / 4)
+
+	def test_angleCalcCCW_HalfPI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCCW(math.cos(math.pi / 2), math.sin(math.pi / 2)), math.pi / 2)
+
+	def test_angleCalcCCW_4thPI3(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 6), round(math.pi / 4 * 3, 6))
+
+	def test_angleCalcCCW_PI(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi), math.sin(math.pi)), 6), round(math.pi, 6))
+
+	def test_angleCalcCCW_4thPI5(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 6), round(math.pi / 4 * 5, 6))
+
+	def test_angleCalcCCW_HalfPI3(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(i.angleCalcCCW(math.cos(math.pi / 2 * 3), math.sin(math.pi / 2 * 3)), math.pi / 2 * 3)
+
+	def test_angleCalcCCW_4thPI7(self):
+		i = GCode.GCodeInterpreter()
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 7), math.sin(math.pi / 4 * 7)), 6), round(math.pi / 4 * 7, 6))
+
+
+class TestCirclesCCW(unittest.TestCase):
+	def setUp(self):
+		self.i = GCode.GCodeInterpreter()
+		self.i.buffer = []
+		self.i.position = [ 9.000, 9.000, 0.000 ]
+
+	def test_basicQuarterCircle(self):
+		self.i.process([ 'G0', 'X-10', 'Y0' ])
+		self.i.process([ 'G3', 'X0', 'Y-10', 'I10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X0,Y10000',
+			'E', 'E', 'C08', 'W10', 'K21,x10000,y0,p1570797'
+		])
+

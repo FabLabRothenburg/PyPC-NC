@@ -204,6 +204,12 @@ class GCodeInterpreter:
 				return i[1:]
 
 	def processG2(self, insn):  # CW circle
+		self._circleMotion(insn, self.angleCalcCW, False)
+
+	def processG3(self, insn):  # CCW circle
+		self._circleMotion(insn, self.angleCalcCCW, True)
+
+	def _circleMotion(self, insn, fAngle, ccw):
 		move = self._readAxes(insn)
 		radius = self._getAddress('R', insn)
 
@@ -271,23 +277,34 @@ class GCodeInterpreter:
 		if not radius:
 			# if the center of the circle is specified directly,
 			# the angle gamma may be larger than 180 deg;
-			alpha = self.angleCalcCW((xa - xc) / a, (ya - yc) / a)
-			beta = self.angleCalcCW((xb - xc) / a, (yb - yc) / a)
+			alpha = fAngle((xa - xc) / a, (ya - yc) / a)
+			beta = fAngle((xb - xc) / a, (yb - yc) / a)
 
 			if beta < alpha: beta += math.pi * 2
 			if beta - alpha >= math.pi: gamma += math.pi
 
 		x = round((xc - xa) * 1000)
 		y = round((yc - ya) * 1000)
+		p = gamma * 1000000
+		if not ccw: p = -p
+
+		# WinPC-NC seems to always ceil the value, for whatever reason ...
+		p = math.ceil(p)
 
 		self.buffer.append('E')
 		self._setSpeed(False)  # always "slow" motion
-		self.buffer.append('K21,x%d,y%d,p%d' % (x, y, gamma * -1000000))
+		self.buffer.append('K21,x%d,y%d,p%d' % (x, y, p))
 		self._mergeIntoPosition(target)
 		self.firstMove = False
 
 	def angleCalcCW(self, x, y):
 		alpha = math.acos(x)
 		if y > 0: alpha = 2 * math.pi - alpha
+
+		return alpha
+
+	def angleCalcCCW(self, x, y):
+		alpha = math.acos(x)
+		if y < 0: alpha = 2 * math.pi - alpha
 
 		return alpha
