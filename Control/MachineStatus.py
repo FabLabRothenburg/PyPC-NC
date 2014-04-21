@@ -167,7 +167,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
 		speed = axisToSpeed[axis];
-		if not fast: speed += 3
+		if not fast: speed += 4
 
 		steps = 1 if positive else -1
 		self.cts()
@@ -181,7 +181,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
 		speed = axisToSpeed[axis];
-		if not fast: speed += 3
+		if not fast: speed += 4
 
 		steps = distance if positive else -distance
 		self.cts()
