@@ -434,3 +434,12 @@ class TestCirclesCCW(unittest.TestCase):
 			'E', 'V2,X20000,Y25000',
 			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p349045'
 		])
+
+	def test_basicThreeQuarterCircle(self):
+		self.i.process([ 'G0', 'X10', 'Y0' ])
+		self.i.process([ 'G3', 'X0', 'Y-10', 'I-10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X20000,Y10000',
+			'E', 'E', 'C08', 'W10', 'K21,x-10000,y0,p4712389'
+		])
