@@ -75,7 +75,8 @@ class GCodeInterpreter:
 		self.firstMove = True
 		self.parameters = { }
 		self.plane = 'XY'
-		self.spindle = 1   # 0 = Off, 1 = CW, 2 = CCW
+		self.spindleEnable = True
+		self.spindleCCW = False
 
 	def run(self, parser):
 		currentBlock = 0
@@ -174,25 +175,44 @@ class GCodeInterpreter:
 		self.end = True
 
 	def processM3(self, insn):  # start spindle clockwise
-		self._setSpindleSpeed(insn, 1)
+		self._setSpindleSpeed(insn, False, True)
 
 	def processM4(self, insn):  # start spindle ccw
-		self._setSpindleSpeed(insn, 2)
+		self._setSpindleSpeed(insn, True, True)
 
-	def _setSpindleSpeed(self, insn, spindle):
+	def processM5(self, insn):  # stop spindle
+		self._setSpindleSpeed(insn, None, False)
+
+	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
 		self.W = 100
+		speed = None
 
-		speed = int(self._getAddress('S', insn))
-		if speed: D = min(255, round(speed * .0141))
-
-		self.buffer.append('E')
-
-		if self.spindle != spindle:
-			if spindle == 1: self.buffer.append('A51')
-			if spindle == 2: self.buffer.append('AD1')
-			self.spindle = spindle
+		if spindleEnable:
+			speed = int(self._getAddress('S', insn))
+			if speed: D = min(255, round(speed * .0141))
 
 		self.buffer.append('E')
+
+		if self.spindleEnable and not spindleEnable:  # turn spindle off
+			if self.spindleCCW:
+				self.buffer.append('AD0')
+			else:
+				self.buffer.append('A50')
+
+		elif self.spindleCCW != spindleCCW or self.spindleEnable != spindleEnable:
+			self.spindleCCW = spindleCCW
+			if spindleCCW:
+				self.buffer.append('AD1')
+			else:
+				self.buffer.append('A51')
+
+		if self.spindleEnable or not spindleEnable:
+			# don't write E if spindle was off and now turned on (for what reason!??)
+			self.buffer.append('E')
+
+		self.spindleEnable = spindleEnable
+		if not spindleEnable: return
+
 		self.buffer.append('W%d' % self.W)
 
 		if not speed: return
