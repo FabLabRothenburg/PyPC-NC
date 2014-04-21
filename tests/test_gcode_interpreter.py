@@ -127,7 +127,7 @@ class TestInterpreterBasics(unittest.TestCase):
 			'E', 'AD1', 'E', 'W100', 'E', 'D99',  'W100',
 		])
 
-	def test_M5(self):
+	def test_M5ccw(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
 		i.process([ 'M3', 'S8000' ])
@@ -141,6 +141,21 @@ class TestInterpreterBasics(unittest.TestCase):
 			'E', 'AD0', 'E',
 			'E', 'AD1',      'W100', 'E', 'D99',  'W100',
 		])
+
+
+	def test_M5cw(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M3', 'S8000' ])
+		i.process([ 'M5' ])
+		i.process([ 'M3', 'S7000' ])
+
+		self.assertEqual(i.buffer, [
+			'E',        'E', 'W100', 'E', 'D113', 'W100',
+			'E', 'A50', 'E',
+			'E', 'A51',      'W100', 'E', 'D99',  'W100',
+		])
+
 
 
 
