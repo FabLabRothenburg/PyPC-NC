@@ -224,6 +224,11 @@ class ControlMachineStatus(QtCore.QObject):
 			self.cts()
 			self._chatBackend.send(command, '')
 
+		self._preparedManualMove = False
+		self.movingX = True
+		self.movingY = True
+		self.movingZ = True
+
 		for command in inter.buffer:
 			self.cts()
 			self._chatBackend.send(command)
