@@ -58,8 +58,15 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def importGCode(self):
+		if not self._status.status & 0x04:
+		        reply = QtGui.QMessageBox.question(self, 'G-Code Import',
+			            'Are you sure to import G-Code without reference movement?',
+				    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+			if reply == QtGui.QMessageBox.No:
+				return
+
 		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
-		print filename[0]
 		self._status.importGCode(filename[0])
 
 	@QtCore.Slot()
