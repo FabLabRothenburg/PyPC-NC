@@ -75,6 +75,7 @@ class GCodeInterpreter:
 		self.firstMove = True
 		self.parameters = { }
 		self.plane = 'XY'
+		self.spindle = 1   # 0 = Off, 1 = CW, 2 = CCW
 
 	def run(self, parser):
 		currentBlock = 0
@@ -173,12 +174,24 @@ class GCodeInterpreter:
 		self.end = True
 
 	def processM3(self, insn):  # start spindle clockwise
+		self._setSpindleSpeed(insn, 1)
+
+	def processM4(self, insn):  # start spindle ccw
+		self._setSpindleSpeed(insn, 2)
+
+	def _setSpindleSpeed(self, insn, spindle):
 		self.W = 100
 
 		speed = int(self._getAddress('S', insn))
 		if speed: D = min(255, round(speed * .0141))
 
 		self.buffer.append('E')
+
+		if self.spindle != spindle:
+			if spindle == 1: self.buffer.append('A51')
+			if spindle == 2: self.buffer.append('AD1')
+			self.spindle = spindle
+
 		self.buffer.append('E')
 		self.buffer.append('W%d' % self.W)
 

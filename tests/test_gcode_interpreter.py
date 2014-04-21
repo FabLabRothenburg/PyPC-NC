@@ -112,6 +112,21 @@ class TestInterpreterBasics(unittest.TestCase):
 			'E', 'E', 'W100', 'E',                 # S40000
 		])
 
+	def test_M4(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M3', 'S8000' ])
+		i.process([ 'M4', 'S5000' ])
+		i.process([ 'M3', 'S6000' ])
+		i.process([ 'M4', 'S7000' ])
+
+		self.assertEqual(i.buffer, [
+			'E',        'E', 'W100', 'E', 'D113', 'W100',
+			'E', 'AD1', 'E', 'W100', 'E', 'D71',  'W100',   # WinPC-NC uses D70
+			'E', 'A51', 'E', 'W100', 'E', 'D85',  'W100',
+			'E', 'AD1', 'E', 'W100', 'E', 'D99',  'W100',
+		])
+
 
 
 

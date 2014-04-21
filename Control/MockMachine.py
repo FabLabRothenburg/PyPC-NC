@@ -272,6 +272,8 @@ class MockMachine:
 		"W100":			None,
 		"W10":			None,
 		"C10":			None,
+		"AD0":			None, # ??
+		"AD1":			None, # ccw spindle direction
 
 		"Q100,0":		None,
 		"Q101,0":		None,
