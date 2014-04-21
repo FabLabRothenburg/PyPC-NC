@@ -76,6 +76,19 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'G19' ])
 		self.assertEqual(i.plane, 'YZ')
 
+	def test_F1(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'F1' ])
+		self.assertEqual(i.buffer, [ 'E', 'G21,1000', 'G20,1000' ])
+
+	def test_F3(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'F3' ])
+		self.assertEqual(i.buffer, [ 'E', 'G21,3000', 'G20,3000' ])
+
+class TestInterpreterCoolantControl(unittest.TestCase):
 	def test_M7(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
@@ -139,6 +152,7 @@ class TestInterpreterBasics(unittest.TestCase):
 			'E', 'AD1'
 		])
 
+class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 	def test_spindleControl_with_CCW_spindle(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []

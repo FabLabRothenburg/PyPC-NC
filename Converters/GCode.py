@@ -145,9 +145,18 @@ class GCodeInterpreter:
 
 	def process(self, insn):
 		try:
-			getattr(self, 'process%s' % insn[0])(insn)
+			if insn[0][0] == 'F':
+				self.processF(insn)
+			else:
+				getattr(self, 'process%s' % insn[0])(insn)
 		except AttributeError:
 			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
+
+	def processF(self, insn):  # set feed rate
+		fr = int(self._getAddress('F', insn)) * self.stretch * 1000
+		self.buffer.append('E')
+		self.buffer.append('G21,%d' % fr)
+		self.buffer.append('G20,%d' % fr)
 
 	def processG17(self, insn):  # plane = XY
 		self.plane = 'XY'
