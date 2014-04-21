@@ -15,6 +15,7 @@ class ControlMachineStatus(QtCore.QObject):
 	movingZ = False
 	movingU = False
 	_preparedManualMove = False
+	_programmedMotionActive = False
 
 	statusUpdated = QtCore.Signal()
 
@@ -52,6 +53,9 @@ class ControlMachineStatus(QtCore.QObject):
 			self.movingY = False
 			self.movingZ = False
 			self.movingU = False
+
+			if self._programmedMotionActive:
+				self.endProgrammedMotion()
 
 	def fetchMachinePos(self, direction):
 		self.cts()
@@ -185,21 +189,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 		setattr(self, 'moving' + axis, True)
 
-	def importGCode(self, fname):
-		parser = GCode.GCodeParser()
-		parser.readFile(fname)
-		parser.removeTapeMarkers()
-		parser.removeInlineComments()
-		parser.removeBlockSkipLines()
-		parser.normalizeAddressWhitespace()
-		parser.readSequenceNumbers()
-
-		inter = GCode.GCodeInterpreter()
-		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
-		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
-		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
-		inter.run(parser)
-
+	def startProgrammedMotion(self):
 		commands = [
 			'@M0',
 			'#G11,5000',
@@ -220,14 +210,58 @@ class ControlMachineStatus(QtCore.QObject):
 			'@N0',
 			'@M2',
 		]
+
 		for command in commands:
 			self.cts()
 			self._chatBackend.send(command, '')
 
 		self._preparedManualMove = False
+		self._programmedMotionActive = True
 		self.movingX = True
 		self.movingY = True
 		self.movingZ = True
+
+	def endProgrammedMotion(self):
+		commands = [
+			'@@',
+			'@M2',
+			'D0',
+			'A60',
+			'Q100,0',
+			'Q101,0',
+			'Q102,0',
+			'Q103,0',
+			'Q104,0',
+			'Q105,0',
+			'Q106,0',
+			'Q107,0',
+			'W100',
+			'A40',
+		]
+
+		for command in commands:
+			self.cts()
+			self._chatBackend.send(command)
+
+		self._programmedMotionActive = False
+
+
+	def importGCode(self, fname):
+		parser = GCode.GCodeParser()
+		parser.readFile(fname)
+		parser.removeTapeMarkers()
+		parser.removeInlineComments()
+		parser.removeBlockSkipLines()
+		parser.normalizeAddressWhitespace()
+		parser.readSequenceNumbers()
+
+		inter = GCode.GCodeInterpreter()
+		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
+		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
+		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
+		inter.run(parser)
+
+		self.startProgrammedMotion()
 
 		for command in inter.buffer:
 			self.cts()
