@@ -80,7 +80,39 @@ class TestInterpreterBasics(unittest.TestCase):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
 		i.process([ 'M3', 'S3000' ])
-		self.assertEqual(i.buffer, [ 'E', 'W100', 'E', 'D42', 'W100' ])
+		self.assertEqual(i.buffer, [ 'E', 'E', 'W100', 'E', 'D42', 'W100' ])
+
+
+	def test_M3_multi(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M3', 'S0' ])
+		i.process([ 'M3', 'S1000' ])
+		i.process([ 'M3', 'S2000' ])
+		i.process([ 'M3', 'S3000' ])
+		i.process([ 'M3', 'S4000' ])
+		i.process([ 'M3', 'S5000' ])
+		i.process([ 'M3', 'S10000' ])
+		i.process([ 'M3', 'S15000' ])
+		i.process([ 'M3', 'S20000' ])
+		i.process([ 'M3', 'S30000' ])
+		i.process([ 'M3', 'S40000' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'E', 'W100',
+			'E', 'E', 'W100', 'E', 'D14', 'W100',  # S1000
+			'E', 'E', 'W100', 'E', 'D28', 'W100',  # S2000
+			'E', 'E', 'W100', 'E', 'D42', 'W100',  # S3000
+			'E', 'E', 'W100', 'E', 'D56', 'W100',  # S4000
+			'E', 'E', 'W100', 'E', 'D71', 'W100',  # S5000; WinPC-NC uses D70
+			'E', 'E', 'W100', 'E', 'D141', 'W100', # S10000
+			'E', 'E', 'W100', 'E', 'D212', 'W100', # S15000
+			'E', 'E', 'W100', 'E', 'D255', 'W100', # S20000
+			'E', 'E', 'W100', 'E',                 # S30000
+			'E', 'E', 'W100', 'E',                 # S40000
+		])
+
+
 
 
 class TestRapidMotionG0(unittest.TestCase):

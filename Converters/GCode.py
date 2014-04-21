@@ -69,6 +69,7 @@ class GCodeInterpreter:
 		self.stretch = 1.0
 		self.end = False
 		self.C = 8
+		self.D = 141
 		self.W = 100
 		self.absDistanceMode = True
 		self.firstMove = True
@@ -172,10 +173,23 @@ class GCodeInterpreter:
 		self.end = True
 
 	def processM3(self, insn):  # start spindle clockwise
+		self.W = 100
+
+		speed = int(self._getAddress('S', insn))
+		if speed: D = min(255, round(speed * .0141))
+
+		self.buffer.append('E')
 		self.buffer.append('E')
 		self.buffer.append('W%d' % self.W)
+
+		if not speed: return
+
 		self.buffer.append('E')
-		self.buffer.append('D42')
+
+		if self.D == D: return
+		self.D = D
+
+		self.buffer.append('D%d' % self.D)
 		self.buffer.append('W%d' % self.W)
 
 	def processM30(self, insn):  # end program
