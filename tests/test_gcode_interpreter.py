@@ -2,7 +2,7 @@ import math
 import unittest
 from Converters import GCode
 
-class TestInterpreterBasics(unittest.TestCase):
+class TestBlockSplitting(unittest.TestCase):
 	def test_splitBlockSelf(self):
 		i = GCode.GCodeInterpreter()
 		self.assertEqual(i.splitBlock('M30'), [ [ 'M30' ] ])
@@ -30,6 +30,7 @@ class TestInterpreterBasics(unittest.TestCase):
 			[ 'M7' ],
 			[ 'F1' ] ])
 
+class TestInterpreterBasics(unittest.TestCase):
 	def test_G20(self):
 		i = GCode.GCodeInterpreter()
 		i.process([ 'G20' ])
@@ -443,3 +444,28 @@ class TestCirclesCCW(unittest.TestCase):
 			'E', 'V1,X20000,Y10000',
 			'E', 'E', 'C08', 'W10', 'K21,x-10000,y0,p4712389'
 		])
+
+
+class TestParameterizedProgramming(unittest.TestCase):
+	def test_readParametersReturnFalseOnNonParam(self):
+		i = GCode.GCodeInterpreter()
+		r = i.readParameters('M30')
+		self.assertEqual(r, False)
+
+	def test_parameterParsing(self):
+		i = GCode.GCodeInterpreter()
+		i.readParameters('#100=0.002000')
+		self.assertEqual(i.parameters[100], 0.002)
+
+	def test_parameterSubstitution(self):
+		i = GCode.GCodeInterpreter()
+		i.parameters[100] = 0.002
+		r = i.substituteParameters('G0 Z#100')
+		self.assertEqual(r, 'G0 Z0.002')
+
+	def test_parameterSubstitutionMulti(self):
+		i = GCode.GCodeInterpreter()
+		i.parameters[100] = 10
+		i.parameters[101] = 5
+		r = i.substituteParameters('G0 X#100 Y#100 Z#101')
+		self.assertEqual(r, 'G0 X10 Y10 Z5')

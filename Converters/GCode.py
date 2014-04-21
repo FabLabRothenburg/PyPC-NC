@@ -57,6 +57,7 @@ class GCodeInterpreter:
 		self.W = 100
 		self.absDistanceMode = True
 		self.firstMove = True
+		self.parameters = { }
 
 	def splitBlock(self, blockStr):
 		instructions = []
@@ -75,6 +76,32 @@ class GCodeInterpreter:
 
 		if cur: instructions.append(cur)
 		return instructions
+
+	def readParameters(self, blockStr):
+		m = re.match(r'\s*#(\d+)\s*=\s*(.*?)\s*$', blockStr)
+		if not m: return False
+
+		key = int(m.group(1))
+
+		if key < 1 or (key > 33 and key < 100) or (key > 199 and key < 500) or key > 999:
+			raise RuntimeError('Parameter #%d is not writeable' % key)
+
+		self.parameters[key] = self.evalExpression(m.group(2))
+
+	def evalExpression(self, expr):
+		m = re.match(r'[0-9\.]+$', expr)
+		if not m:
+			raise RuntimeError('Unsupported expression: %s' % expr)
+		return float(expr)
+
+	def substituteParameters(self, blockStr):
+		while True:
+			m = re.search(r'#(\d+)\b', blockStr)
+			if not m: break
+
+			key = int(m.group(1))
+			blockStr = blockStr[:m.start()] + str(self.parameters[key]) + blockStr[m.end():]
+		return blockStr
 
 	def process(self, insn):
 		try:
