@@ -76,12 +76,63 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'G19' ])
 		self.assertEqual(i.plane, 'YZ')
 
+	def test_M7(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M7' ])
+		self.assertEqual(i.buffer, [ 'E', 'A53' ])
+
+	def test_M7repeat(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M7' ])
+		i.process([ 'M7' ])
+		i.process([ 'M7' ])
+		self.assertEqual(i.buffer, [ 'E', 'A53', 'E', 'E' ])
+
+	def test_M8(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M8' ])
+		self.assertEqual(i.buffer, [ 'E', 'A53' ])
+
+	def test_M8repeat(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M8' ])
+		i.process([ 'M8' ])
+		i.process([ 'M8' ])
+		self.assertEqual(i.buffer, [ 'E', 'A53', 'E', 'E' ])
+
+	def test_M9(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.coolantEnable = True
+		i.process([ 'M9' ])
+		self.assertEqual(i.buffer, [ 'E', 'A51' ])
+
+	def test_M9repeat(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.coolantEnable = True
+		i.process([ 'M9' ])
+		i.process([ 'M9' ])
+		i.process([ 'M9' ])
+		self.assertEqual(i.buffer, [ 'E', 'A51', 'E', 'E' ])
+
+	def test_M9_initiallyOff(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M9' ])
+		self.assertEqual(i.buffer, [ 'E' ])
+
+
+class TestInterpreterSpindleSpeed(unittest.TestCase):
 	def test_M3(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
 		i.process([ 'M3', 'S3000' ])
 		self.assertEqual(i.buffer, [ 'E', 'E', 'W100', 'E', 'D42', 'W100' ])
-
 
 	def test_M3_multi(self):
 		i = GCode.GCodeInterpreter()

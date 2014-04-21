@@ -268,6 +268,7 @@ class MockMachine:
 		"A40":			None,
 		"A50":			None,
 		"A51":			None,
+		"A53":			None,
 		"A60":			None,
 		"W100":			None,
 		"W10":			None,

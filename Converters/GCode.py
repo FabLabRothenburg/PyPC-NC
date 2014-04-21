@@ -78,6 +78,7 @@ class GCodeInterpreter:
 		self.spindleEnable = True
 		self.spindleCCW = False
 		self.initialW100Stickyness = True
+		self.coolantEnable = False
 
 	def run(self, parser):
 		currentBlock = 0
@@ -184,6 +185,21 @@ class GCodeInterpreter:
 
 	def processM5(self, insn):  # stop spindle
 		self._setSpindleSpeed(insn, None, False)
+
+	def processM7(self, insn):  # coolant on "mist"
+		self.buffer.append('E')
+		if not self.coolantEnable:
+			self.buffer.append('A53')
+		self.coolantEnable = True
+
+	def processM8(self, insn):  # coolant on "flood"; equal behaviour in WinPC-NC
+		self.processM7(insn)
+
+	def processM9(self, insn):  # coolant off
+		self.buffer.append('E')
+		if self.coolantEnable:
+			self.buffer.append('A51')
+		self.coolantEnable = False
 
 	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
 		# spindle speed setting of WinPC-NC writes W100 lines, however
