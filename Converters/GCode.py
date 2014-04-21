@@ -189,7 +189,10 @@ class GCodeInterpreter:
 	def processM7(self, insn):  # coolant on "mist"
 		self.buffer.append('E')
 		if not self.coolantEnable:
-			self.buffer.append('A53')
+			if self.spindleCCW:
+				self.buffer.append('AD3')
+			else:
+				self.buffer.append('A53')
 		self.coolantEnable = True
 
 	def processM8(self, insn):  # coolant on "flood"; equal behaviour in WinPC-NC
@@ -198,7 +201,10 @@ class GCodeInterpreter:
 	def processM9(self, insn):  # coolant off
 		self.buffer.append('E')
 		if self.coolantEnable:
-			self.buffer.append('A51')
+			if self.spindleCCW:
+				self.buffer.append('AD1')
+			else:
+				self.buffer.append('A51')
 		self.coolantEnable = False
 
 	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
@@ -216,16 +222,16 @@ class GCodeInterpreter:
 
 		if self.spindleEnable and not spindleEnable:  # turn spindle off
 			if self.spindleCCW:
-				self.buffer.append('AD0')
+				self.buffer.append('AD2' if self.coolantEnable else 'AD0')
 			else:
-				self.buffer.append('A50')
+				self.buffer.append('A52' if self.coolantEnable else 'A50')
 
 		elif self.spindleCCW != spindleCCW or self.spindleEnable != spindleEnable:
 			self.spindleCCW = spindleCCW
 			if spindleCCW:
-				self.buffer.append('AD1')
+				self.buffer.append('AD3' if self.coolantEnable else 'AD1')
 			else:
-				self.buffer.append('A51')
+				self.buffer.append('A53' if self.coolantEnable else 'A51')
 
 		if self.spindleEnable or not spindleEnable:
 			# don't write E if spindle was off and now turned on (for what reason!??)

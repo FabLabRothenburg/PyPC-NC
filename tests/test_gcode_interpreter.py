@@ -126,6 +126,53 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'M9' ])
 		self.assertEqual(i.buffer, [ 'E' ])
 
+	def test_M8M9_with_CCW_spindle(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M4', 'S3000' ])
+		i.process([ 'M8' ])
+		i.process([ 'M9' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'AD1', 'E', 'W100', 'E', 'D42', 'W100',
+			'E', 'AD3',
+			'E', 'AD1'
+		])
+
+	def test_spindleControl_with_CCW_spindle(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M4', 'S3000' ])
+		i.process([ 'M8' ])
+		i.process([ 'M5' ])
+		i.process([ 'M4', 'S4000' ])
+		i.process([ 'M9' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'AD1', 'E', 'W100', 'E', 'D42', 'W100',
+			'E', 'AD3',						# M8
+			'E', 'AD2', 'E',					# M5
+			'E', 'AD3',      'W100', 'E', 'D56', 'W100',		# M4 S4000
+			'E', 'AD1'
+		])
+
+	def test_spindleControl_with_CCW_spindle(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M3', 'S3000' ])
+		i.process([ 'M8' ])
+		i.process([ 'M5' ])
+		i.process([ 'M3', 'S4000' ])
+		i.process([ 'M9' ])
+
+		self.assertEqual(i.buffer, [
+			'E',        'E', 'W100', 'E', 'D42', 'W100',
+			'E', 'A53',						# M8
+			'E', 'A52', 'E',					# M5
+			'E', 'A53',      'W100', 'E', 'D56', 'W100',		# M3 S4000
+			'E', 'A51'
+		])
+
 
 class TestInterpreterSpindleSpeed(unittest.TestCase):
 	def test_M3(self):

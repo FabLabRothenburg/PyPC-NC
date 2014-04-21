@@ -268,6 +268,7 @@ class MockMachine:
 		"A40":			None,
 		"A50":			None,
 		"A51":			None,
+		"A52":			None,
 		"A53":			None,
 		"A60":			None,
 		"W100":			None,
@@ -275,6 +276,8 @@ class MockMachine:
 		"C10":			None,
 		"AD0":			None, # ??
 		"AD1":			None, # ccw spindle direction
+		"AD2":			None, # ccw spindle off + coolant on
+		"AD3":			None, # ccw spindle direction + coolant on
 
 		"Q100,0":		None,
 		"Q101,0":		None,
