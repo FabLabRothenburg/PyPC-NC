@@ -136,6 +136,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		if self._ui.drive1Step.isChecked():
 			self._status.singleStep(axis, positive, fast)
+		elif self._ui.drive001mm.isChecked():
+			self._status.manualMove(axis, positive, 10, fast)
 		elif self._ui.drive01mm.isChecked():
 			self._status.manualMove(axis, positive, 100, fast)
 		elif self._ui.drive1mm.isChecked():

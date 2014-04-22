@@ -517,6 +517,16 @@
             </widget>
            </item>
            <item>
+            <widget class="QRadioButton" name="drive001mm">
+             <property name="text">
+              <string>0.01 mm</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">driveDistanceGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item>
             <widget class="QRadioButton" name="drive01mm">
              <property name="text">
               <string>0.1 mm</string>
