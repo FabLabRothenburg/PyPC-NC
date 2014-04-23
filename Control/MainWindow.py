@@ -19,10 +19,21 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
 		self._ui.importGCode.clicked.connect(self.importGCode)
 
-		self._ui.storeXY.clicked.connect(self.storeXY)
-		self._ui.storeXYZ.clicked.connect(self.storeXYZ)
-		self._ui.gotoXY.clicked.connect(self.gotoXY)
-		self._ui.gotoXYZ.clicked.connect(self.gotoXYZ)
+		self._ui.gotoOther.setMenu(self._ui.menuGoto)
+		self._ui.storeOther.setMenu(self._ui.menuStore)
+		self._ui.menuBar.hide()
+
+		self._ui.storeXY.triggered.connect(self.storeXY)
+		self._ui.storeXYZ.triggered.connect(self.storeXYZ)
+		self._ui.storeX.triggered.connect(self.storeX)
+		self._ui.storeY.triggered.connect(self.storeY)
+		self._ui.storeZ.triggered.connect(self.storeZ)
+
+		self._ui.gotoXY.triggered.connect(self.gotoXY)
+		self._ui.gotoXYZ.triggered.connect(self.gotoXYZ)
+		self._ui.gotoX.triggered.connect(self.gotoX)
+		self._ui.gotoY.triggered.connect(self.gotoY)
+		self._ui.gotoZ.triggered.connect(self.gotoZ)
 
 		self._ui.driveXUp.clicked.connect(self.driveXUp)
 		self._ui.driveYUp.clicked.connect(self.driveYUp)
@@ -33,7 +44,6 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.driveZDown.clicked.connect(self.driveZDown)
 		self._ui.driveUDown.clicked.connect(self.driveUDown)
 
-		self._logger = ControlChatLog(chatBackend.getChatLog(), self._ui.log)
 		self._status.updateStatus()
 
 	@QtCore.Slot()
@@ -92,12 +102,39 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._status.storeXYZ()
 
 	@QtCore.Slot()
+	def storeX(self):
+		self.storeButtonUsed = True
+		self._status.storeX()
+
+	@QtCore.Slot()
+	def storeY(self):
+		self.storeButtonUsed = True
+		self._status.storeY()
+
+	@QtCore.Slot()
+	def storeZ(self):
+		self.storeButtonUsed = True
+		self._status.storeZ()
+
+	@QtCore.Slot()
 	def gotoXY(self):
 		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, False)
 
 	@QtCore.Slot()
 	def gotoXYZ(self):
 		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, True)
+
+	@QtCore.Slot()
+	def gotoX(self):
+		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, False, False)
+
+	@QtCore.Slot()
+	def gotoY(self):
+		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), False, True, False)
+
+	@QtCore.Slot()
+	def gotoZ(self):
+		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), False, False, True)
 
 	@QtCore.Slot()
 	def driveXUp(self):
@@ -146,32 +183,3 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self._status.manualMove(axis, positive, 10000, fast)
 		elif self._ui.drive100mm.isChecked():
 			self._status.manualMove(axis, positive, 100000, fast)
-
-class ControlChatLog():
-	def __init__(self, chatLog, listView):
-		self._chatLog = chatLog;
-		self._listView = listView;
-
-		self._model = QtGui.QStandardItemModel(listView);
-		listView.setModel(self._model);
-
-		chatLog.newMessage.connect(self.messageHandler)
-
-
-	@QtCore.Slot(str, str)
-	def messageHandler(self, direction, message):
-		scrollbar = self._listView.verticalScrollBar()
-		scrollToBottom = scrollbar.value() == scrollbar.maximum()
-
-		item = QtGui.QStandardItem(message)
-		item.setEditable(False)
-
-		if direction == "out":
-			item.setIcon(QtGui.QIcon.fromTheme("go-previous"))
-		else:
-			item.setIcon(QtGui.QIcon.fromTheme("go-next"))
-
-		self._model.appendRow(item)
-
-		if scrollToBottom:
-			self._listView.scrollToBottom()

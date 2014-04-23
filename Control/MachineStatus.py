@@ -122,6 +122,18 @@ class ControlMachineStatus(QtCore.QObject):
 		self.wpY = self.pY
 		self.wpZ = self.pZ
 
+	@QtCore.Slot()
+	def storeX(self):
+		self.wpX = self.pX
+
+	@QtCore.Slot()
+	def storeY(self):
+		self.wpY = self.pY
+
+	@QtCore.Slot()
+	def storeZ(self):
+		self.wpZ = self.pZ
+
 	def gotoWorkpiece(self, fast, x, y, z):
 		if not self._preparedManualMove:
 			self.prepareManualMove()
