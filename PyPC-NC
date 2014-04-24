@@ -3,7 +3,7 @@ import Chat
 import Chat.Backends
 from Control import *
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 import sys
 import argparse
 
@@ -20,7 +20,12 @@ if __name__ == "__main__":
 	else:
 		cb = Chat.Backends.ChatBackendSerial(log, args.device)
 
+	translator = QtCore.QTranslator()
+	translator.load('i18n/' + QtCore.QLocale.system().name())
+
 	app = QtGui.QApplication(sys.argv)
+	app.installTranslator(translator)
+
 	mainwin = ControlMainWindow(cb)
 	mainwin.show()
 	sys.exit(app.exec_())
