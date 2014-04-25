@@ -6,4 +6,4 @@ clean:
 	rm -f $(PYFILES)
 
 %.py: %.ui
-	pyside-uic $< > $@
+	pyside-uic -o $@ $<
