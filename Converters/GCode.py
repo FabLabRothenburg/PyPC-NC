@@ -108,6 +108,8 @@ class GCodeInterpreter:
 
 			if cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
 				cur.append(i)
+			elif cur and cur[0] in [ 'M6' ] and i[0] == 'T':
+				cur.append(i)
 			elif i[0] in [ 'G', 'M', 'F', 'S', 'T' ]:
 				if cur: instructions.append(cur)
 				cur = [i]
@@ -201,6 +203,9 @@ class GCodeInterpreter:
 
 	def processM5(self, insn):  # stop spindle
 		self._setSpindleSpeed(insn, None, False)
+
+	def processM6(self, insn):  # tool change (not supported)
+		self.buffer.append('E')
 
 	def processM7(self, insn):  # coolant on "mist"
 		self.buffer.append('E')
