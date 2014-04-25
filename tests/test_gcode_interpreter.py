@@ -737,6 +737,15 @@ class TestCirclesCCW(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x-10000,y0,p4712389'
 		])
 
+	def test_negativeRadius(self):
+		self.i.process([ 'G0', 'X100', 'Y90' ])
+		self.i.process([ 'G3', 'X90', 'Y100', 'R-10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X110000,Y100000',
+			'E', 'E', 'C08', 'W10', 'K21,x0,y10000,p4712389'
+		])
+
 
 class TestParameterizedProgramming(unittest.TestCase):
 	def test_readParametersReturnFalseOnNonParam(self):

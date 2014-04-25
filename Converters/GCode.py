@@ -433,7 +433,10 @@ class GCodeInterpreter:
 			x1 = a * y1 + b;
 			x2 = a * y2 + b;
 
-			if self._calcInnerAngle(xa, ya, xb, yb, x1, y1, fAngle) < self._calcInnerAngle(xa, ya, xb, yb, x2, y2, fAngle):
+			k = self._calcInnerAngle(xa, ya, xb, yb, x1, y1, fAngle) < self._calcInnerAngle(xa, ya, xb, yb, x2, y2, fAngle)
+			if float(radius) < 0: k = not k
+
+			if k:
 				xc = x1
 				yc = y1
 			else:
@@ -468,14 +471,13 @@ class GCodeInterpreter:
 		# law of cosine
 		gamma = math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))
 
-		if not radius:
-			# if the center of the circle is specified directly,
-			# the angle gamma may be larger than 180 deg;
-			alpha = fAngle((xa - xc) / a, (ya - yc) / a)
-			beta = fAngle((xb - xc) / a, (yb - yc) / a)
+		# if the center of the circle is specified directly,
+		# the angle gamma may be larger than 180 deg;
+		alpha = fAngle((xa - xc) / a, (ya - yc) / a)
+		beta = fAngle((xb - xc) / a, (yb - yc) / a)
 
-			if beta < alpha: beta += math.pi * 2
-			if beta - alpha >= math.pi: gamma += math.pi
+		if beta < alpha: beta += math.pi * 2
+		if beta - alpha > math.pi: gamma += math.pi
 
 		x = round((xc - xa) * 1000)
 		y = round((yc - ya) * 1000)
