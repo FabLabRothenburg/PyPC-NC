@@ -635,7 +635,7 @@ class TestAngleCalcCW(unittest.TestCase):
 
 	def test_angleCalcCW_4thPI(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(i.angleCalcCW(math.cos(-math.pi / 4), math.sin(-math.pi / 4)), math.pi / 4)
+		self.assertEqual(round(i.angleCalcCW(math.cos(-math.pi / 4), math.sin(-math.pi / 4)), 3), round(math.pi / 4, 3))
 
 	def test_angleCalcCW_HalfPI(self):
 		i = GCode.GCodeInterpreter()
@@ -643,15 +643,15 @@ class TestAngleCalcCW(unittest.TestCase):
 
 	def test_angleCalcCW_4thPI3(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 6), round(math.pi / 4 * 3, 6))
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 3), round(math.pi / 4 * 3, 3))
 
 	def test_angleCalcCW_PI(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi), math.sin(math.pi)), 6), round(math.pi, 6))
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi), math.sin(math.pi)), 3), round(math.pi, 3))
 
 	def test_angleCalcCW_4thPI5(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 6), round(math.pi / 4 * 5, 6))
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 3), round(math.pi / 4 * 5, 3))
 
 	def test_angleCalcCW_HalfPI3(self):
 		i = GCode.GCodeInterpreter()
@@ -659,7 +659,7 @@ class TestAngleCalcCW(unittest.TestCase):
 
 	def test_angleCalcCW_4thPI7(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), 6), round(math.pi / 4 * 7, 6))
+		self.assertEqual(round(i.angleCalcCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), 3), round(math.pi / 4 * 7, 3))
 
 class TestAngleCalcCCW(unittest.TestCase):
 	def test_angleCalcCCW_0(self):
@@ -668,7 +668,7 @@ class TestAngleCalcCCW(unittest.TestCase):
 
 	def test_angleCalcCCW_4thPI(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(i.angleCalcCCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), math.pi / 4)
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4), math.sin(math.pi / 4)), 3), round(math.pi / 4, 3))
 
 	def test_angleCalcCCW_HalfPI(self):
 		i = GCode.GCodeInterpreter()
@@ -676,15 +676,15 @@ class TestAngleCalcCCW(unittest.TestCase):
 
 	def test_angleCalcCCW_4thPI3(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 6), round(math.pi / 4 * 3, 6))
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 3), math.sin(math.pi / 4 * 3)), 3), round(math.pi / 4 * 3, 3))
 
 	def test_angleCalcCCW_PI(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi), math.sin(math.pi)), 6), round(math.pi, 6))
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi), math.sin(math.pi)), 3), round(math.pi, 3))
 
 	def test_angleCalcCCW_4thPI5(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 6), round(math.pi / 4 * 5, 6))
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 5), math.sin(math.pi / 4 * 5)), 3), round(math.pi / 4 * 5, 3))
 
 	def test_angleCalcCCW_HalfPI3(self):
 		i = GCode.GCodeInterpreter()
@@ -692,7 +692,7 @@ class TestAngleCalcCCW(unittest.TestCase):
 
 	def test_angleCalcCCW_4thPI7(self):
 		i = GCode.GCodeInterpreter()
-		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 7), math.sin(math.pi / 4 * 7)), 6), round(math.pi / 4 * 7, 6))
+		self.assertEqual(round(i.angleCalcCCW(math.cos(math.pi / 4 * 7), math.sin(math.pi / 4 * 7)), 3), round(math.pi / 4 * 7, 3))
 
 
 class TestCirclesCCW(unittest.TestCase):
