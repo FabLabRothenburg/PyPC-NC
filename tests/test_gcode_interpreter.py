@@ -34,7 +34,7 @@ class TestInterpreterBasics(unittest.TestCase):
 	def test_G20(self):
 		i = GCode.GCodeInterpreter()
 		i.process([ 'G20' ])
-		self.assertEqual(i.stretch, 2.54)
+		self.assertEqual(i.stretch, 25.4)
 
 	def test_G21(self):
 		i = GCode.GCodeInterpreter()
@@ -455,20 +455,20 @@ class TestCoordinatedMotionG1(unittest.TestCase):
 
 	def test_G1_simpleZ0(self):
 		self.i.process([ 'G1', 'Z0' ])
-		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,z10000' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,Z10000' ])
 
 	def test_G1_simpleXYZ1(self):
 		self.i.process([ 'G1', 'X1' ])
 		self.i.process([ 'G1', 'Y1' ])
 		self.i.process([ 'G1', 'Z1' ])
-		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X11000', 'E', 'V21,Y11000', 'E', 'V21,z11000' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X11000', 'E', 'V21,Y11000', 'E', 'V21,Z11000' ])
 
 	def test_G1_simpleXYZ1_G91(self):
 		self.i.process([ 'G91' ])
 		self.i.process([ 'G1', 'X1' ])
 		self.i.process([ 'G1', 'Y1' ])
 		self.i.process([ 'G1', 'Z1' ])
-		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X11000,Y10000,Z10000', 'E', 'V21,Y11000', 'E', 'V21,z11000' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'C08', 'W10', 'V21,X11000,Y10000,Z10000', 'E', 'V21,Y11000', 'E', 'V21,Z11000' ])
 
 class TestG0G1Switching(unittest.TestCase):
 	def setUp(self):
