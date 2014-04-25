@@ -492,12 +492,14 @@ class GCodeInterpreter:
 		self.firstMove = False
 
 	def angleCalcCW(self, x, y):
+		x = round(x, 6)
 		alpha = math.acos(x)
 		if y > 0: alpha = 2 * math.pi - alpha
 
 		return alpha
 
 	def angleCalcCCW(self, x, y):
+		x = round(x, 6)
 		alpha = math.acos(x)
 		if y < 0: alpha = 2 * math.pi - alpha
 
