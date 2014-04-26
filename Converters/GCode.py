@@ -64,6 +64,8 @@ class GCodeParser:
 
 class GCodeInterpreter:
 	axes = [ 'X', 'Y', 'Z' ]
+	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80' ]
+	axesCommands = [ 'G0', 'G1', 'G2', 'G3' ]
 
 	def __init__(self):
 		self.buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
@@ -106,21 +108,35 @@ class GCodeInterpreter:
 	def splitBlock(self, blockStr):
 		instructions = []
 		cur = []
+		axes = []
+		axesCommandIndex = None
 
 		for i in blockStr.split(' '):
 			if i == '': continue
 
-			if cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
+			if i[0] in self.axes:
+				axes.append(i)
+			elif cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
 				cur.append(i)
 			elif cur and cur[0] in [ 'M6' ] and i[0] == 'T':
 				cur.append(i)
 			elif i[0] in [ 'G', 'M', 'F', 'S', 'T' ]:
 				if cur: instructions.append(cur)
+				if i in self.axesCommands:
+					axesCommandIndex = len(cur)
 				cur = [i]
 			else:
 				cur.append(i)
 
 		if cur: instructions.append(cur)
+
+		if axes:
+			if axesCommandIndex == None:
+				instructions.append([ self.currentMotionCommand ] + axes)
+				pass
+			else:
+				instructions[axesCommandIndex] = instructions[axesCommandIndex] + axes
+
 		return instructions
 
 	def readParameters(self, blockStr):
@@ -158,6 +174,9 @@ class GCodeInterpreter:
 
 	def process(self, insn):
 		try:
+			if insn[0] in self.motionGroup:
+				self.currentMotionCommand = insn[0]
+
 			if insn[0][0] == 'F':
 				self.processF(insn)
 			elif insn[0][0] == 'S':
