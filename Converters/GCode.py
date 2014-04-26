@@ -160,16 +160,32 @@ class GCodeInterpreter:
 		try:
 			if insn[0][0] == 'F':
 				self.processF(insn)
+			elif insn[0][0] == 'S':
+				self.processS(insn)
+			elif insn[0][0] == 'T':
+				self.processT(insn)
 			else:
 				getattr(self, 'process%s' % insn[0])(insn)
 		except AttributeError:
 			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
 
 	def processF(self, insn):  # set feed rate
-		fr = int(self._getAddress('F', insn)) * self.stretch * 1000
+		fr = float(self._getAddress('F', insn)) * self.stretch * 1000
 		self.buffer.append('E')
 		self.buffer.append('G21,%d' % fr)
 		self.buffer.append('G20,%d' % fr)
+
+        def processS(self, insn):  # set spindle speed
+                self.D = min(255, round(float(self._getAddress('S', insn)) * .0141))
+		self.buffer.append('E')
+		self.buffer.append('D%d' % self.D)
+		self.buffer.append('W100')
+
+        def processT(self, insn):  # select tool
+                pass
+
+        def processG04(self, insn):  # dwell
+                pass
 
 	def processG17(self, insn):  # plane = XY
 		self.plane = 'XY'
@@ -186,9 +202,24 @@ class GCodeInterpreter:
 	def processG21(self, insn):  # unit = mm
 		self.stretch = 1.00
 
+        def processG40(self, insn):  # disable tool radius compensation
+                pass
+
+        def processG49(self, insn):  # disable tool length compensation
+                pass
+
+        def processG54(self, insn):  # select coordinate system 1
+                pass
+
+        def processG61(self, insn):  # exact path mode
+                pass
+
 	def processG64(self, insn):  # path blending
 		# not supported, i.e. also not handled by WinPC-NC
 		pass
+
+        def processG80(self, insn):  # cancel modal motion
+                pass
 
 	def processG90(self, insn):  # absolute distance mode
 		self.absDistanceMode = True
@@ -237,11 +268,15 @@ class GCodeInterpreter:
 		# the global W-state doesn't seem to be modified, at least
 		# sub-sequent motions don't change W to the wanted value.
 		#self.W = 100
+
 		speed = None
 
 		if spindleEnable:
-			speed = int(self._getAddress('S', insn))
-			if speed: D = min(255, round(speed * .0141))
+                        S = self._getAddress('S', insn)
+
+                        if S != None:
+                                speed = int(S)
+                                if speed: D = min(255, round(speed * .0141))
 
 		self.buffer.append('E')
 
