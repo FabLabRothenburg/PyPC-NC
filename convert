@@ -11,6 +11,7 @@ def main():
 		parser = GCode.GCodeParser()
 		parser.readFile(file)
 		parser.removeTapeMarkers()
+		parser.removeComments()
 		parser.removeInlineComments()
 		parser.removeBlockSkipLines()
 		parser.normalizeAddressWhitespace()

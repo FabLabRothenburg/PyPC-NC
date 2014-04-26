@@ -39,6 +39,10 @@ class GCodeParser:
 				if old == self.lines[i]:
 					break
 
+        def removeComments(self):
+                def f(x): return re.sub(r'\s*;.*', '', x)
+                self.lines = map(f, self.lines)
+
 	def removeBlockSkipLines(self):
 		def f(x):
 			x = x.strip()

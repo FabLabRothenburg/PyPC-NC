@@ -262,6 +262,7 @@ class ControlMachineStatus(QtCore.QObject):
 		parser = GCode.GCodeParser()
 		parser.readFile(fname)
 		parser.removeTapeMarkers()
+		parser.removeComments()
 		parser.removeInlineComments()
 		parser.removeBlockSkipLines()
 		parser.normalizeAddressWhitespace()
