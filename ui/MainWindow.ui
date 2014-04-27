@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>817</width>
+    <width>880</width>
     <height>414</height>
    </rect>
   </property>
@@ -16,92 +16,125 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
-     <widget class="QGroupBox" name="groupBox">
-      <property name="minimumSize">
-       <size>
-        <width>150</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>Status Info</string>
-      </property>
-      <layout class="QFormLayout" name="formLayout">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-       </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelX">
-         <property name="text">
-          <string>@X</string>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Status Info</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="statusX">
-         <property name="text">
-          <string>04 (ready)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelPx">
-         <property name="text">
-          <string>@PX</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="statusPx">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelPy">
-         <property name="text">
-          <string>@PY</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="statusPy">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelPz">
-         <property name="text">
-          <string>@PZ</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="statusPz">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelPu">
-         <property name="text">
-          <string>@PU</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="statusPu">
-         <property name="text">
-          <string>123</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+         <item row="0" column="0">
+          <widget class="QLabel" name="labelX">
+           <property name="text">
+            <string>@X</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="statusX">
+           <property name="text">
+            <string>04 (ready)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelPx">
+           <property name="text">
+            <string>@PX</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="statusPx">
+           <property name="text">
+            <string>123</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelPy">
+           <property name="text">
+            <string>@PY</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="statusPy">
+           <property name="text">
+            <string>123</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelPz">
+           <property name="text">
+            <string>@PZ</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="statusPz">
+           <property name="text">
+            <string>123</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="labelPu">
+           <property name="text">
+            <string>@PU</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLabel" name="statusPu">
+           <property name="text">
+            <string>123</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Options</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QCheckBox" name="invertZ">
+           <property name="text">
+            <string>Invert Z-axis</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
     <item>
      <spacer name="horizontalSpacer_2">
@@ -241,7 +274,6 @@
           </spacer>
          </item>
         </layout>
-        <zorder>groupBox_2</zorder>
         <zorder>horizontalSpacer_4</zorder>
        </widget>
       </item>
@@ -721,7 +753,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>817</width>
+     <width>880</width>
      <height>25</height>
     </rect>
    </property>

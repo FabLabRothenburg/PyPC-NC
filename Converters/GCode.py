@@ -85,6 +85,7 @@ class GCodeInterpreter:
 		self.spindleCCW = False
 		self.initialW100Stickyness = True
 		self.coolantEnable = False
+		self.invertZ = False
 
 	def run(self, parser):
 		currentBlock = -1
@@ -361,6 +362,9 @@ class GCodeInterpreter:
 
 	def _straightMotion(self, insn, rapid):
 		move = self._readAxes(insn)
+
+		if self.invertZ and move[2] != None:
+			move[2] = -move[2]
 
 		if self.absDistanceMode:
 			target = self._vectorAdd(move, self.offsets)

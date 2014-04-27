@@ -258,7 +258,7 @@ class ControlMachineStatus(QtCore.QObject):
 		self._programmedMotionActive = False
 
 
-	def importGCode(self, fname):
+	def importGCode(self, fname, invertZ):
 		parser = GCode.GCodeParser()
 		parser.readFile(fname)
 		parser.removeTapeMarkers()
@@ -272,6 +272,7 @@ class ControlMachineStatus(QtCore.QObject):
 		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
 		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
 		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
+		inter.invertZ = invertZ
 		inter.run(parser)
 
 		self.startProgrammedMotion()

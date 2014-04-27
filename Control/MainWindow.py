@@ -89,7 +89,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
 		if filename[0] == '': return
 
-		self._status.importGCode(filename[0])
+		self._status.importGCode(filename[0], self._ui.invertZ.isChecked())
 
 	@QtCore.Slot()
 	def storeXY(self):

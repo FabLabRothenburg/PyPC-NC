@@ -416,6 +416,12 @@ class TestRapidMotionG0(unittest.TestCase):
 		self.i.process([ 'G0', 'Z10' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V3,Z10000', 'E', 'V3,Z20000' ])
 
+	def test_G0_simpleZ0Z10invert(self):
+		self.i.invertZ = True
+		self.i.process([ 'G0', 'Z0' ])
+		self.i.process([ 'G0', 'Z10' ])
+		self.assertEqual(self.i.buffer, [ 'E', 'V3,Z10000', 'E', 'V3,Z0' ])
+
 	def test_G0_incrXXX(self):
 		self.i.process([ 'G0', 'X0' ])
 		self.i.process([ 'G91' ])
