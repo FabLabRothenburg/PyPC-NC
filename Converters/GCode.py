@@ -188,8 +188,8 @@ class GCodeInterpreter:
 		except AttributeError:
 			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
 
-	def processF(self, insn):  # set feed rate
-		fr = float(self._getAddress('F', insn)) * self.stretch * 1000
+	def processF(self, insn):  # set feed rate in units per minute
+		fr = float(self._getAddress('F', insn)) * self.stretch * 1000 / 60
 		self.buffer.append('E')
 		self.buffer.append('G21,%d' % fr)
 		self.buffer.append('G20,%d' % fr)

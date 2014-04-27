@@ -76,16 +76,16 @@ class TestInterpreterBasics(unittest.TestCase):
 		i.process([ 'G19' ])
 		self.assertEqual(i.plane, 'YZ')
 
-	def test_F1(self):
+	def test_F60(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
-		i.process([ 'F1' ])
+		i.process([ 'F60' ])
 		self.assertEqual(i.buffer, [ 'E', 'G21,1000', 'G20,1000' ])
 
-	def test_F3(self):
+	def test_F180(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
-		i.process([ 'F3' ])
+		i.process([ 'F180' ])
 		self.assertEqual(i.buffer, [ 'E', 'G21,3000', 'G20,3000' ])
 
 class TestInterpreterCoolantControl(unittest.TestCase):
