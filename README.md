@@ -30,6 +30,10 @@ Especially the interpreter (currently) lacks support for
  * B-splines and nurbs
  * absolute arc distance mode
  * canned cycles (especially drilling)
+ * dwells
+ * tool length & radius compensation
+ * exact path mode & path blending
+ * coordinate system selection
 
 
 Gimmicks
