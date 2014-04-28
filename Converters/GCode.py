@@ -581,7 +581,7 @@ class GCodeInterpreter:
 	def processG81(self, insn):
 		move = self._readAxes(insn)
 		oldZ = self.position[2]
-                R = float(self._getAddress('R', insn)) * self.stretch
+		clearZ = float(self._getAddress('R', insn)) * self.stretch
 		L = self._getAddress('L', insn)
 
 		if L == None:
@@ -594,17 +594,22 @@ class GCodeInterpreter:
 
 		if self.absDistanceMode:
 			target = self._vectorAdd(move, self.offsets)
-			R += self.offsets[2]
+			clearZ += self.offsets[2]
+			Z = target[2]
 		else:
-			target = self._vectorAdd(move, self.incrPosition)
+			target = self.incrPosition
+			clearZ += self.incrPosition[2]
+			Z = clearZ + move[2]
 
-		if oldZ < R:
-			oldZ = R
-			self._straightMotionToTarget([ None, None, R ], True)
+		if oldZ < clearZ:
+			oldZ = clearZ
+			self._straightMotionToTarget([ None, None, clearZ ], True)
 
 		for i in xrange(L):
+			if not self.absDistanceMode:
+				target = self._vectorAdd(move, target)
+
 			self._straightMotionToTarget([ target[0], target[1], None ], True)
-			self._straightMotionToTarget([ None, None, R ], True)
-			self._straightMotionToTarget([ None, None, target[2] ], False)
+			self._straightMotionToTarget([ None, None, clearZ ], True)
+			self._straightMotionToTarget([ None, None, Z ], False)
 			self._straightMotionToTarget([ None, None, oldZ ], True)
-		pass

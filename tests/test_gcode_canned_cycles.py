@@ -93,3 +93,48 @@ class TestDrillingCycle(unittest.TestCase):
 			# 4. a rapid move parallel to the Z-axis to (Z3)
 			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z13000',
 		])
+
+	def test_relativePosition(self):
+		self.i.position = [ 11.000, 12.000, 13.000 ]
+		self.i.incrPosition = [ 11.000, 12.000, 13.000 ]
+		self.i.firstMove = False
+		self.i.process([ 'G91' ])  # relative distance mode
+		self.i.process([ 'G98' ])  # retract to old Z
+		self.i.process([ 'G81', 'X4', 'Y5', 'Z-0.6', 'R1.8', 'L3' ])
+
+		self.maxDiff = None
+		self.assertEqual(self.i.buffer, [
+			# The first preliminary move is a maximum rapid move along the Z axis to
+			# (X1,Y2,Z4.8), since OLD_Z < clear Z.
+			'E', 'V3,Z14800',
+
+			# --- first iteration ---
+			# 1. a rapid move parallel to the XY plane to (X5, Y7)
+			'E', 'V2,X15000,Y17000',
+
+			# 2. move parallel to the Z-axis at the feed rate to (Z4.2)
+			'E', 'E', 'C08', 'W10', 'V21,Z14200',
+
+			# 4. a rapid move parallel to the Z-axis to (Z4.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+
+			# --- second iteration ---
+			# 1. a rapid move parallel to the XY plane to (X9, Y12)
+			'E', 'V2,X19000,Y22000',
+
+			# 2. move parallel to the Z-axis at the feed rate to (Z4.2)
+			'E', 'E', 'C08', 'W10', 'V21,Z14200',
+
+			# 4. a rapid move parallel to the Z-axis to (Z4.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+
+			# --- third iteration ---
+			# 1. a rapid move parallel to the XY plane to (X13, Y17)
+			'E', 'V2,X23000,Y27000',
+
+			# 2. move parallel to the Z-axis at the feed rate to (Z4.2)
+			'E', 'E', 'C08', 'W10', 'V21,Z14200',
+
+			# 4. a rapid move parallel to the Z-axis to (Z4.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+		])
