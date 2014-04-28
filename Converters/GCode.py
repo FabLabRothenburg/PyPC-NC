@@ -247,6 +247,12 @@ class GCodeInterpreter:
 	def processG91(self, insn):  # incremental distance mode
 		self.absDistanceMode = False
 
+	def processG98(self, insn):  # retract to prior position
+		self.retractToOldZ = True
+
+	def processG99(self, insn):  # retract to R position
+		self.retractToOldZ = False
+
 	def processM2(self, insn):  # end program
 		self.end = True
 
@@ -371,6 +377,9 @@ class GCodeInterpreter:
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
+		self._straightMotionToTarget(target, rapid)
+
+	def _straightMotionToTarget(self, target, rapid):
 		command = [ None ]
 		dist = 0
 
@@ -568,3 +577,20 @@ class GCodeInterpreter:
 		if y < 0: alpha = 2 * math.pi - alpha
 
 		return alpha
+
+	def processG81(self, insn):
+		move = self._readAxes(insn)
+		oldZ = self.position[2]
+                R = float(self._getAddress('R', insn)) * self.stretch
+
+		if self.absDistanceMode:
+			target = self._vectorAdd(move, self.offsets)
+			R += self.offsets[2]
+		else:
+			target = self._vectorAdd(move, self.incrPosition)
+
+		self._straightMotionToTarget([ target[0], target[1], None ], True)
+		self._straightMotionToTarget([ None, None, R ], True)
+		self._straightMotionToTarget([ None, None, target[2] ], False)
+		self._straightMotionToTarget([ None, None, oldZ ], True)
+		pass
