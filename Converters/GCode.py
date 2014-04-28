@@ -589,6 +589,10 @@ class GCodeInterpreter:
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
+		if oldZ < R:
+			oldZ = R
+			self._straightMotionToTarget([ None, None, R ], True)
+
 		self._straightMotionToTarget([ target[0], target[1], None ], True)
 		self._straightMotionToTarget([ None, None, R ], True)
 		self._straightMotionToTarget([ None, None, target[2] ], False)

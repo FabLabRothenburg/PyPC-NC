@@ -33,3 +33,23 @@ class TestDrillingCycle(unittest.TestCase):
 			# 4. a rapid move parallel to the Z-axis to (Z3)
 			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z13000'
 		])
+
+	def test_absolutePosition_RgtZ(self):
+		self.i.position = [ 10.000, 10.000, 10.000 ]
+		self.i.process([ 'G90' ])  # abs distance mode
+		self.i.process([ 'G98' ])  # retract to old Z
+		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8' ])
+
+		self.assertEqual(self.i.buffer, [
+			# 1. a rapid move parallel to the Z-axis to (Z2.8).
+			'E', 'V3,Z12800',
+
+			# 2. a rapid move parallel to the XY plane to (X4, Y5)
+			'E', 'V2,X14000,Y15000',
+
+			# 3. move parallel to the Z-axis at the feed rate to (Z1.5)
+			'E', 'E', 'C08', 'W10', 'V21,Z11500',
+
+			# 4. a rapid move parallel to the Z-axis to (Z2.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z12800'
+		])
