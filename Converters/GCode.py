@@ -582,6 +582,15 @@ class GCodeInterpreter:
 		move = self._readAxes(insn)
 		oldZ = self.position[2]
                 R = float(self._getAddress('R', insn)) * self.stretch
+		L = self._getAddress('L', insn)
+
+		if L == None:
+			L = 1
+		else:
+			L = int(L)
+
+			if L < 1:
+				raise ValueError('L of G81 must be a natural number')
 
 		if self.absDistanceMode:
 			target = self._vectorAdd(move, self.offsets)
@@ -593,8 +602,9 @@ class GCodeInterpreter:
 			oldZ = R
 			self._straightMotionToTarget([ None, None, R ], True)
 
-		self._straightMotionToTarget([ target[0], target[1], None ], True)
-		self._straightMotionToTarget([ None, None, R ], True)
-		self._straightMotionToTarget([ None, None, target[2] ], False)
-		self._straightMotionToTarget([ None, None, oldZ ], True)
+		for i in xrange(L):
+			self._straightMotionToTarget([ target[0], target[1], None ], True)
+			self._straightMotionToTarget([ None, None, R ], True)
+			self._straightMotionToTarget([ None, None, target[2] ], False)
+			self._straightMotionToTarget([ None, None, oldZ ], True)
 		pass
