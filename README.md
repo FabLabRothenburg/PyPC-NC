@@ -37,3 +37,14 @@ Gimmicks
 
  * mockserial, binds the mock implementation to a PTY which can be provided to
    WinPC-NC via Wine (thus allowing mock sessions with WinPC-NC)
+
+
+Bug in pyside-uic 
+-------------------
+
+There is a bug in pyside-uic, caused by use of QButtonGroup and yields
+"an unexpected error occured" message during `make`.
+See https://bugreports.qt-project.org/browse/PYSIDE-126 for details.
+
+`sudo vim /usr/share/pyshared/pysideuic/uiparser.py +212` and replace
+`bg_name = bg_i18n.string` by `bg_name = bg_i18n`.
