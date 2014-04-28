@@ -44,6 +44,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.driveZDown.clicked.connect(self.driveZDown)
 		self._ui.driveUDown.clicked.connect(self.driveUDown)
 
+		self._ui.feedRateOverride.valueChanged.connect(self.feedRateOverrideChanged)
+
 		self._status.updateStatus()
 
 	@QtCore.Slot()
@@ -90,6 +92,10 @@ class ControlMainWindow(QtGui.QMainWindow):
 		if filename[0] == '': return
 
 		self._status.importGCode(filename[0], self._ui.invertZ.isChecked())
+
+	@QtCore.Slot(int)
+	def feedRateOverrideChanged(self, value):
+		self._status.setFeedRateOverride(value)
 
 	@QtCore.Slot()
 	def storeXY(self):

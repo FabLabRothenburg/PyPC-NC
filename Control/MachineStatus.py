@@ -16,6 +16,7 @@ class ControlMachineStatus(QtCore.QObject):
 	movingU = False
 	_preparedManualMove = False
 	_programmedMotionActive = False
+	_feedRateOverride = 100
 
 	statusUpdated = QtCore.Signal()
 
@@ -26,6 +27,10 @@ class ControlMachineStatus(QtCore.QObject):
                 self._timer = QtCore.QTimer(self)
                 self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
                 self._timer.start(1000)
+
+	def setFeedRateOverride(self, i):
+		self._feedRateOverride = i
+		self._chatBackend.send("O%d" % self._feedRateOverride)
 
         @QtCore.Slot()
 	def updateStatus(self):
@@ -221,6 +226,7 @@ class ControlMachineStatus(QtCore.QObject):
 			'#C43,1',
 			'@N0',
 			'@M2',
+			'O%d' % self._feedRateOverride,
 		]
 
 		for command in commands:
