@@ -64,8 +64,8 @@ class GCodeParser:
 
 class GCodeInterpreter:
 	axes = [ 'X', 'Y', 'Z' ]
-	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80' ]
-	axesCommands = [ 'G0', 'G1', 'G2', 'G3' ]
+	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80', 'G81' ]
+	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81' ]
 
 	def __init__(self):
 		self.buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
