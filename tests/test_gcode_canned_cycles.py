@@ -161,3 +161,85 @@ class TestDrillingCycle(unittest.TestCase):
 			# 4. a rapid move parallel to the Z-axis to (Z0 [oldZ])
 			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z10000',
 		])
+
+	def test_absolutePositionPeckDrill(self):
+		self.i.position = [ 11.000, 12.000, 13.000 ]
+		self.i.process([ 'G90' ])  # abs distance mode
+		self.i.process([ 'G98' ])  # retract to old Z
+		self.i.process([ 'G83', 'X4', 'Y5', 'Z1.5', 'R2.8', 'Q1.0' ])
+
+		self.assertEqual(self.i.buffer, [
+			# 1. a rapid move parallel to the XY plane to (X4, Y5)
+			'E', 'V1,X14000,Y15000',
+
+			# 2. a rapid move parallel to the Z-axis to (Z2.8).
+			'E', 'V3,Z12800',
+
+			# 3. move Z-axis downward at feed rate to Z1.8 (max delta Q)
+			'E', 'E', 'C08', 'W10', 'V21,Z11800',
+
+			# 4. Rapid move back out to the retract plane (R, Z2.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z12800',
+
+			# 5. Rapid move back in, backed off a bit
+			'E', 'V3,Z11900',
+
+			# 6. move parallel to the Z-axis at the feed rate to (Z1.5)
+			'E', 'E', 'C08', 'W10', 'V21,Z11500',
+
+			# 7. a rapid move parallel to the Z-axis to (Z3)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z13000'
+		])
+
+	def test_relativePositionPeckDrill(self):
+		self.i.position = [ 11.000, 12.000, 13.000 ]
+		self.i.incrPosition = [ 11.000, 12.000, 13.000 ]
+		self.i.firstMove = False
+		self.i.process([ 'G91' ])  # relative distance mode
+		self.i.process([ 'G98' ])  # retract to old Z
+		self.i.process([ 'G83', 'X4', 'Y5', 'Z-0.6', 'R1.8', 'L2', 'Q0.4' ])
+
+		self.maxDiff = None
+		self.assertEqual(self.i.buffer, [
+			# The first preliminary move is a maximum rapid move along the Z axis to
+			# (X1,Y2,Z4.8), since OLD_Z < clear Z.
+			'E', 'V3,Z14800',
+
+			# --- first iteration ---
+			# 1. a rapid move parallel to the XY plane to (X5, Y7)
+			'E', 'V2,X15000,Y17000',
+
+			# 2. move parallel to the Z-axis at the feed rate to Z4.4 (max of Q0.4 from 4.8)
+			'E', 'E', 'C08', 'W10', 'V21,Z14400',
+
+			# 3. a rapid move parallel to the Z-axis to (Z4.8); peck out
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+
+			# 4. a rapid move parallel to the Z-axis to (Z4.5); peck in
+			'E', 'V3,Z14500',
+
+			# 5. move parallel to the Z-axis at the feed rate to Z4.2
+			'E', 'E', 'C08', 'W10', 'V21,Z14200',
+
+			# 6. a rapid move parallel to the Z-axis to (Z4.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+
+			# --- second iteration ---
+			# 1. a rapid move parallel to the XY plane to (X9, Y12)
+			'E', 'V2,X19000,Y22000',
+
+			# 2. move parallel to the Z-axis at the feed rate to Z4.4 (max of Q0.4 from 4.8)
+			'E', 'E', 'C08', 'W10', 'V21,Z14400',
+
+			# 3. a rapid move parallel to the Z-axis to (Z4.8); peck out
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+
+			# 4. a rapid move parallel to the Z-axis to (Z4.5); peck in
+			'E', 'V3,Z14500',
+
+			# 5. move parallel to the Z-axis at the feed rate to Z4.2
+			'E', 'E', 'C08', 'W10', 'V21,Z14200',
+
+			# 6. a rapid move parallel to the Z-axis to (Z4.8)
+			'E', 'C10', 'W10', 'E', 'C10', 'W10', 'V3,Z14800',
+		])

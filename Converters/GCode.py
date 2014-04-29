@@ -578,7 +578,7 @@ class GCodeInterpreter:
 
 		return alpha
 
-	def processG81(self, insn):
+	def _processCannedCycle(self, insn, peck):
 		move = self._readAxes(insn)
 		oldZ = self.position[2]
 		clearZ = float(self._getAddress('R', insn)) * self.stretch
@@ -591,6 +591,14 @@ class GCodeInterpreter:
 
 			if L < 1:
 				raise ValueError('L of G81 must be a natural number')
+
+		if peck:
+			Q = self._getAddress('Q', insn)
+			if Q == None: raise ValueError('Q of G83 not set')
+
+			Q = float(Q)
+			if Q <= 0:
+				raise ValueError('Q of G83 must not be zero or negative')
 
 		if self.absDistanceMode:
 			target = self._vectorAdd(move, self.offsets)
@@ -611,5 +619,32 @@ class GCodeInterpreter:
 
 			self._straightMotionToTarget([ target[0], target[1], None ], True)
 			self._straightMotionToTarget([ None, None, clearZ ], True)
-			self._straightMotionToTarget([ None, None, Z ], False)
+
+			while True:
+				if peck:
+					targetZ = self.position[2] - Q
+					if Z > targetZ: targetZ = Z
+				else:
+					targetZ = Z
+
+				self._straightMotionToTarget([ None, None, targetZ ], False)
+				if targetZ == Z: break
+
+				if peck:
+					self._straightMotionToTarget([ None, None, clearZ ], True)
+
+					peckOffset = Q / 3
+					if peckOffset > 0.1: peckOffset = 0.1
+
+					peckZ = targetZ + peckOffset
+					if peckZ > clearZ: peckZ = clearZ
+
+					self._straightMotionToTarget([ None, None, peckZ ], True)
+
 			self._straightMotionToTarget([ None, None, oldZ ], True)
+
+	def processG81(self, insn):
+		self._processCannedCycle(insn, False)
+
+	def processG83(self, insn):
+		self._processCannedCycle(insn, True)
