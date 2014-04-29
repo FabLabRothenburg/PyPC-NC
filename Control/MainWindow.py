@@ -70,6 +70,13 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
 		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
 
+		if self._status.totalSteps:
+			self._ui.progress.setMaximum(self._status.totalSteps)
+			self._ui.progress.setValue(self._status.N)
+		else:
+			self._ui.progress.setMaximum(1)
+			self._ui.progress.setValue(0)
+
 	@QtCore.Slot()
 	def importGCode(self):
 		if not self._status.status & 0x04:

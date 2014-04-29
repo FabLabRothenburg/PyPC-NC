@@ -160,6 +160,16 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Work progress</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="progress"/>
+         </item>
         </layout>
        </widget>
       </item>

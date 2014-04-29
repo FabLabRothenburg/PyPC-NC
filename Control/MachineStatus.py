@@ -10,6 +10,8 @@ class ControlMachineStatus(QtCore.QObject):
 	wpX = 1000
 	wpY = 1000
 	wpZ = 0
+	totalSteps = 0
+	N = 0
 	movingX = False
 	movingY = False
 	movingZ = False
@@ -51,6 +53,9 @@ class ControlMachineStatus(QtCore.QObject):
 		if self.pU == None or self.movingU:
 			self.pU = self.fetchMachinePos("PU")
 
+		if self._programmedMotionActive:
+			self.N = self.fetchMachinePos('N')
+
 		self.statusUpdated.emit()
 
 		if (self.status & 0x10) == 0:
@@ -67,9 +72,11 @@ class ControlMachineStatus(QtCore.QObject):
 		self._chatBackend.send("@" + direction)
 		res = self._chatBackend.getline()
 
-		if res[0:3] != "@" + direction.upper():
+		i = len(direction) + 1
+
+		if res[0:i] != "@" + direction.upper():
 			raise ValueError("Unexpected reply to @" + direction + " command: " + res)
-		return float(res[3:])
+		return float(res[i:])
 
 	def cts(self):
 		while self._chatBackend.hasLines():
@@ -262,6 +269,7 @@ class ControlMachineStatus(QtCore.QObject):
 			self._chatBackend.send(command)
 
 		self._programmedMotionActive = False
+		self.totalSteps = 0
 
 
 	def importGCode(self, fname, invertZ):
@@ -282,7 +290,9 @@ class ControlMachineStatus(QtCore.QObject):
 		inter.run(parser)
 
 		self.startProgrammedMotion()
+		self.totalSteps = 0
 
 		for command in inter.buffer:
 			self.cts()
 			self._chatBackend.send(command)
+			if command == 'E': self.totalSteps += 1
