@@ -29,10 +29,10 @@ Especially the interpreter (currently) lacks support for
  * helical arcs (G2 and G3 code with Z axis word)
  * B-splines and nurbs
  * absolute arc distance mode
- * canned cycles (especially drilling)
- * dwells
+ * boring canned cycles (G84 to G89)
+ * dwells and dwell-requiring canned cycles (G82, G86 et al)
  * tool length & radius compensation
- * exact path mode & path blending
+ * path blending
  * coordinate system selection
 
 
