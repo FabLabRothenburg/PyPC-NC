@@ -249,6 +249,9 @@ class MockMachine:
 		"$A00":			"",
 		"@D08":			"",
 
+		"@O0":			"",
+		"@C0":			"",
+
 		#
 		# after reference movement
 		#
