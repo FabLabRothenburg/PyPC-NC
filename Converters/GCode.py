@@ -271,7 +271,9 @@ class GCodeInterpreter:
 	def processM7(self, insn):  # coolant on "mist"
 		self.buffer.append('E')
 		if not self.coolantEnable:
-			if self.spindleCCW:
+			if not self.spindleEnable:
+				self.buffer.append('A52')
+			elif self.spindleCCW:
 				self.buffer.append('AD3')
 			else:
 				self.buffer.append('A53')
@@ -283,7 +285,9 @@ class GCodeInterpreter:
 	def processM9(self, insn):  # coolant off
 		self.buffer.append('E')
 		if self.coolantEnable:
-			if self.spindleCCW:
+			if not self.spindleEnable:
+				self.buffer.append('A50')
+			elif self.spindleCCW:
 				self.buffer.append('AD1')
 			else:
 				self.buffer.append('A51')

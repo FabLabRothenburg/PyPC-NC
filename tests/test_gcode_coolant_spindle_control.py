@@ -100,6 +100,19 @@ class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 			'E', 'A51'
 		])
 
+	def test_coolantControl_with_spindle_off(self):
+		i = GCode.GCodeInterpreter()
+		i.buffer = []
+		i.process([ 'M5' ])
+		i.process([ 'M7' ])
+		i.process([ 'M9' ])
+
+		self.assertEqual(i.buffer, [
+			'E', 'A50', 'E',
+			'E', 'A52',
+			'E', 'A50',
+		])
+
 class TestInterpreterSpindleSpeed(unittest.TestCase):
 	def test_M3(self):
 		i = GCode.GCodeInterpreter()
