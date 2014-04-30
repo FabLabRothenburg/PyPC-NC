@@ -30,7 +30,6 @@ Especially the interpreter (currently) lacks support for
  * plane switching (currently solely XY plane is supported)
  * helical arcs (G2 and G3 code with Z axis word)
  * B-splines and nurbs
- * absolute arc distance mode
  * boring canned cycles (G84 to G89)
  * dwells and dwell-requiring canned cycles (G82, G86 et al)
  * tool length & radius compensation

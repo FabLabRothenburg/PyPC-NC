@@ -78,6 +78,7 @@ class GCodeInterpreter:
 		self.D = 141
 		self.W = 100
 		self.absDistanceMode = True
+		self.absArcDistanceMode = False
 		self.firstMove = True
 		self.parameters = { }
 		self.plane = 'XY'
@@ -185,7 +186,7 @@ class GCodeInterpreter:
 			elif insn[0][0] == 'T':
 				self.processT(insn)
 			else:
-				getattr(self, 'process%s' % insn[0])(insn)
+				getattr(self, 'process%s' % insn[0].replace('.', '_'))(insn)
 		except AttributeError:
 			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
 
@@ -244,8 +245,14 @@ class GCodeInterpreter:
 	def processG90(self, insn):  # absolute distance mode
 		self.absDistanceMode = True
 
+	def processG90_1(self, insn):  # absolute arc distance mode
+		self.absArcDistanceMode = True
+
 	def processG91(self, insn):  # incremental distance mode
 		self.absDistanceMode = False
+
+	def processG91_1(self, insn):  # incremental arc distance mode
+		self.absArcDistanceMode = False
 
 	def processG98(self, insn):  # retract to prior position
 		self.retractToOldZ = True
@@ -522,15 +529,19 @@ class GCodeInterpreter:
 			i = self._getAddress('I', insn)
 			j = self._getAddress('J', insn)
 
-			if i:
-				xc = self.position[0] + float(i) * self.stretch
+			if self.absArcDistanceMode:
+				xc = self.offsets[0] + float(i) * self.stretch
+				yc = self.offsets[1] + float(j) * self.stretch
 			else:
-				xc = self.position[0]
+				if i:
+					xc = self.position[0] + float(i) * self.stretch
+				else:
+					xc = self.position[0]
 
-			if j:
-				yc = self.position[1] + float(j) * self.stretch
-			else:
-				yc = self.position[1]
+				if j:
+					yc = self.position[1] + float(j) * self.stretch
+				else:
+					yc = self.position[1]
 
 		# a = dist B-C
 		a = math.sqrt((xb - xc) ** 2 + (yb - yc) ** 2)

@@ -240,3 +240,35 @@ class TestCirclesCCW(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x0,y10000,p4712389'
 		])
 
+
+class TestArcDistanceModes(unittest.TestCase):
+	def setUp(self):
+		self.i = GCode.GCodeInterpreter()
+		self.i.buffer = []
+		self.i.position = [ 9.000, 9.000, 0.000 ]
+		self.i.offsets = [ 30.000, 30.000, 10.000 ]
+
+	def test_incrementalMode(self):
+		self.i.process([ 'G91.1' ])
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.i.process([ 'G1', 'X10', 'Y10' ])
+		self.i.process([ 'G2', 'X20', 'Y20', 'I10', 'J0' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X30000,Y30000',
+			'E', 'E', 'C08', 'W10', 'V21,X40000,Y40000',
+			'E', 'K21,x10000,y0,p-1570796',
+		])
+
+	def test_absoluteMode(self):
+		self.i.process([ 'G90.1' ])
+		self.i.process([ 'G0', 'X0', 'Y0' ])
+		self.i.process([ 'G1', 'X10', 'Y10' ])
+		self.i.process([ 'G2', 'X20', 'Y20', 'I20', 'J10' ])
+
+		self.assertEqual(self.i.buffer, [
+			'E', 'V1,X30000,Y30000',
+			'E', 'E', 'C08', 'W10', 'V21,X40000,Y40000',
+			'E', 'K21,x10000,y0,p-1570796',
+		])
+
