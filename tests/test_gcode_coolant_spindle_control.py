@@ -83,7 +83,7 @@ class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 			'E', 'AD1'
 		])
 
-	def test_spindleControl_with_CCW_spindle(self):
+	def test_spindleControl_with_CW_spindle(self):
 		i = GCode.GCodeInterpreter()
 		i.buffer = []
 		i.process([ 'M3', 'S3000' ])

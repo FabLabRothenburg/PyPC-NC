@@ -35,7 +35,7 @@ class TestCirclesCW(unittest.TestCase):
 			'E', 'E', 'C08', 'W10', 'K21,x0,y20000,p-1570796'
 		])
 
-	def test_basicQuarterCircle(self):
+	def test_basicQuarterCircle3(self):
 		self.i.process([ 'G0', 'X10', 'Y15' ])
 		self.i.process([ 'G2', 'X-10', 'Y-5', 'R20' ])
 

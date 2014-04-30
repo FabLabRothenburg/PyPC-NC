@@ -29,11 +29,11 @@ class TestRapidMotionG0(unittest.TestCase):
 		self.i.process([ 'G0', 'Y20' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V2,Y20000', 'E', 'V2,Y30000' ])
 
-	def test_G0_simpleXY0(self):
+	def test_G0_simpleXY0_Ylonger(self):
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V2,X10000,Y10000' ])
 
-	def test_G0_simpleXY0(self):
+	def test_G0_simpleXY0_Xlonger(self):
 		self.i.position = [ 5.000, 9.500, 2.000 ]
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.assertEqual(self.i.buffer, [ 'E', 'V1,X10000,Y10000' ])
