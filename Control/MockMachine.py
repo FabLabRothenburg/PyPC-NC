@@ -431,6 +431,11 @@ class MockMachine:
 				return '*031'  # out of range
 			return ''
 
+		# G21,15000
+		if command[0] == 'G':
+			self._status |= 0x10
+			return None
+
 		if command == '@N':
 			reply = '@N%d' % self._curStep
 			if self._curStep < self._planSteps:
