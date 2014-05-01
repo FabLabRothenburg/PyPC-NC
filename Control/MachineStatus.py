@@ -17,6 +17,7 @@ class ControlMachineStatus(QtCore.QObject):
 	movingZ = False
 	movingU = False
 	_preparedManualMove = False
+	_programmedMotionBuffer = None
 	_programmedMotionActive = False
 	_feedRateOverride = 100
 
@@ -66,6 +67,9 @@ class ControlMachineStatus(QtCore.QObject):
 
 			if self._programmedMotionActive:
 				self.endProgrammedMotion()
+                else:
+			if self._programmedMotionActive:
+				self.runProgrammedMotion()
 
 	def fetchMachinePos(self, direction):
 		self.cts()
@@ -241,11 +245,37 @@ class ControlMachineStatus(QtCore.QObject):
 			self.cts()
 			self._chatBackend.send(command, '')
 
+		self.totalSteps = 0
+		self.sentSteps = 0
+		self.N = 0
+
+		for command in self._programmedMotionBuffer:
+			if command == 'E': self.totalSteps += 1
+
 		self._preparedManualMove = False
 		self._programmedMotionActive = True
 		self.movingX = True
 		self.movingY = True
 		self.movingZ = True
+
+		self.runProgrammedMotion()
+
+	def runProgrammedMotion(self):
+		if not len(self._programmedMotionBuffer):
+			return
+
+		if self.N + 250 < self.sentSteps:
+			return	# machine still has work to do; don't send yet
+
+		while len(self._programmedMotionBuffer) and self.sentSteps - self.N < 2000:
+			command = self._programmedMotionBuffer.pop(0)
+			if command == 'E': self.sentSteps += 1
+
+			print "sent %d of %d; current N: %d; next command: %s" % (self.sentSteps, self.totalSteps, self.N, command)
+
+			self.cts()
+			self._chatBackend.send(command)
+
 
 	def endProgrammedMotion(self):
 		commands = [
@@ -290,10 +320,5 @@ class ControlMachineStatus(QtCore.QObject):
 		inter.invertZ = invertZ
 		inter.run(parser)
 
+		self._programmedMotionBuffer = inter.buffer
 		self.startProgrammedMotion()
-		self.totalSteps = 0
-
-		for command in inter.buffer:
-			self.cts()
-			self._chatBackend.send(command)
-			if command == 'E': self.totalSteps += 1
