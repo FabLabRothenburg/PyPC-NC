@@ -32,7 +32,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 	def setFeedRateOverride(self, i):
 		self._feedRateOverride = i
-		self._chatBackend.send("O%d" % self._feedRateOverride)
+		self._chatBackend.send("@O%d" % self._feedRateOverride)
 
         @QtCore.Slot()
 	def updateStatus(self):
@@ -179,6 +179,7 @@ class ControlMachineStatus(QtCore.QObject):
 			'#G86,2000',
 			'#G87,1000',
 			'@M1',
+			'@O%d' % self._feedRateOverride,
 		]
 		for command in commands:
 			self.cts()
@@ -233,7 +234,7 @@ class ControlMachineStatus(QtCore.QObject):
 			'#C43,1',
 			'@N0',
 			'@M2',
-			'O%d' % self._feedRateOverride,
+			'@O%d' % self._feedRateOverride,
 		]
 
 		for command in commands:
