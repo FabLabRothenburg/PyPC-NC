@@ -424,9 +424,9 @@ class MockMachine:
 			self._status |= 0x10
 			return None
 
-		# O100 (feed rate override)
-		if command[0] == 'O':
-			val = int(command[1:])
+		# @O100 (feed rate override)
+		if command[0:2] == '@O':
+			val = int(command[2:])
 			if val < 10 or val > 200:
 				return '*031'  # out of range
 			return ''
