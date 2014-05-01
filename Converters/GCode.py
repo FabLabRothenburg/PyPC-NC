@@ -597,6 +597,11 @@ class GCodeInterpreter:
 		move = self._readAxes(insn)
 		oldZ = self.position[2]
 		clearZ = float(self._getAddress('R', insn)) * self.stretch
+
+		if self.invertZ:
+			if move[2] != None: move[2] = -move[2]
+			clearZ = -clearZ
+
 		L = self._getAddress('L', insn)
 
 		if L == None:
@@ -624,7 +629,7 @@ class GCodeInterpreter:
 			clearZ += self.incrPosition[2]
 			Z = clearZ + move[2]
 
-		if oldZ < clearZ:
+		if oldZ > clearZ:
 			oldZ = clearZ
 			self._straightMotionToTarget([ None, None, clearZ ], True)
 
@@ -637,8 +642,8 @@ class GCodeInterpreter:
 
 			while True:
 				if peck:
-					targetZ = self.position[2] - Q
-					if Z > targetZ: targetZ = Z
+					targetZ = self.position[2] + Q
+					if Z < targetZ: targetZ = Z
 				else:
 					targetZ = Z
 
@@ -651,8 +656,8 @@ class GCodeInterpreter:
 					peckOffset = Q / 3
 					if peckOffset > 0.1: peckOffset = 0.1
 
-					peckZ = targetZ + peckOffset
-					if peckZ > clearZ: peckZ = clearZ
+					peckZ = targetZ - peckOffset
+					if peckZ < clearZ: peckZ = clearZ
 
 					self._straightMotionToTarget([ None, None, peckZ ], True)
 
