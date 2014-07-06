@@ -2,9 +2,11 @@ from ui.MainWindow import Ui_MainWindow
 from PySide import QtGui, QtCore
 
 from Control.MachineStatus import ControlMachineStatus
+from Control.GraphicsView import ControlGraphicsView
 
 class ControlMainWindow(QtGui.QMainWindow):
 	storeButtonUsed = False
+	_gv = None
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
@@ -45,8 +47,16 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.driveUDown.clicked.connect(self.driveUDown)
 
 		self._ui.feedRateOverride.valueChanged.connect(self.feedRateOverrideChanged)
+		self._ui.showGraphicsView.clicked.connect(self.showGraphicsView)
 
 		self._status.updateStatus()
+
+	@QtCore.Slot()
+	def showGraphicsView(self):
+		if self._gv == None:
+			self._gv = ControlGraphicsView()
+			self._gv.show()
+
 
 	@QtCore.Slot()
 	def statusUpdated(self):

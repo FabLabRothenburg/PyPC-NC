@@ -1,4 +1,4 @@
-PYFILES := MainWindow.py
+PYFILES := MainWindow.py GraphicsView.py
 
 all: $(PYFILES)
 

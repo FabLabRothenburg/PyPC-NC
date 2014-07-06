@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>880</width>
+    <width>885</width>
     <height>414</height>
    </rect>
   </property>
@@ -787,6 +787,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="showGraphicsView">
+        <property name="text">
+         <string>Graphics View ...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -808,7 +815,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>880</width>
+     <width>885</width>
      <height>25</height>
     </rect>
    </property>
