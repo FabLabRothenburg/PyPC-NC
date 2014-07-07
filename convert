@@ -21,7 +21,7 @@ def main():
 		inter.offsets = [ 30, 30, 10 ]
 		inter.run(parser)
 
-		for line in inter.buffer:
+		for line in inter.target.buffer:
 			print line
 
 if __name__ == "__main__":

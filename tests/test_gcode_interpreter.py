@@ -77,15 +77,15 @@ class TestInterpreterBasics(unittest.TestCase):
 
 	def test_F60(self):
 		i = GCode.GCodeInterpreter()
-		i.buffer = []
+		i.target.buffer = []
 		i.process([ 'F60' ])
-		self.assertEqual(i.buffer, [ 'E', 'G21,1000', 'G20,1000' ])
+		self.assertEqual(i.target.buffer, [ 'E', 'G21,1000', 'G20,1000' ])
 
 	def test_F180(self):
 		i = GCode.GCodeInterpreter()
-		i.buffer = []
+		i.target.buffer = []
 		i.process([ 'F180' ])
-		self.assertEqual(i.buffer, [ 'E', 'G21,3000', 'G20,3000' ])
+		self.assertEqual(i.target.buffer, [ 'E', 'G21,3000', 'G20,3000' ])
 
 class TestParameterizedProgramming(unittest.TestCase):
 	def test_readParametersReturnFalseOnNonParam(self):

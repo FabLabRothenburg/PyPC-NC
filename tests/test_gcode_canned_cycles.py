@@ -4,7 +4,7 @@ from Converters import GCode
 class TestDrillingCycle(unittest.TestCase):
 	def setUp(self):
 		self.i = GCode.GCodeInterpreter()
-		self.i.buffer = []
+		self.i.target.buffer = []
 
 		# we assume that lower Z values are closer to the workpiece
 		# than higher Z values
@@ -24,7 +24,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8' ])
 
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# 1. a rapid move parallel to the XY plane to (X4, Y5)
 			'E', 'V1,X14000,Y15000',
 
@@ -44,7 +44,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8' ])
 
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# 1. a rapid move parallel to the Z-axis to (Z2.8).
 			'E', 'V3,Z7200',
 
@@ -64,7 +64,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8', 'L3' ])
 
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# 1. a rapid move parallel to the XY plane to (X4, Y5)
 			'E', 'V1,X14000,Y15000',
 
@@ -107,7 +107,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z-0.6', 'R1.8', 'L3' ])
 
 		self.maxDiff = None
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# The first preliminary move is a maximum rapid move along the Z axis to
 			# (X1,Y2,Z4.8), since OLD_Z < clear Z.
 			'E', 'V3,Z5200',
@@ -152,7 +152,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z-0.6', 'R-0.2', 'L1' ])
 
 		self.maxDiff = None
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# 1. a rapid move parallel to the XY plane to (X4, Y5)
 			'E', 'V2,X14000,Y15000',
 
@@ -172,7 +172,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G83', 'X4', 'Y5', 'Z1.5', 'R2.8', 'Q1.0' ])
 
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# 1. a rapid move parallel to the XY plane to (X4, Y5)
 			'E', 'V1,X14000,Y15000',
 
@@ -204,7 +204,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.i.process([ 'G83', 'X4', 'Y5', 'Z-0.6', 'R1.8', 'L2', 'Q0.4' ])
 
 		self.maxDiff = None
-		self.assertEqual(self.i.buffer, [
+		self.assertEqual(self.i.target.buffer, [
 			# The first preliminary move is a maximum rapid move along the Z axis to
 			# (X1,Y2,Z4.8), since OLD_Z < clear Z.
 			'E', 'V3,Z5200',

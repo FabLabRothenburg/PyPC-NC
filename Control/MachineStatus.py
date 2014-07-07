@@ -320,5 +320,5 @@ class ControlMachineStatus(QtCore.QObject):
 		inter.invertZ = invertZ
 		inter.run(parser)
 
-		self._programmedMotionBuffer = inter.buffer
+		self._programmedMotionBuffer = inter.target.buffer
 		self.startProgrammedMotion()

@@ -1,6 +1,8 @@
 import re
 import math
 
+from Converters import CNCCon
+
 class GCodeParser:
 	sequenceNumbers = { }
 
@@ -39,9 +41,9 @@ class GCodeParser:
 				if old == self.lines[i]:
 					break
 
-        def removeComments(self):
-                def f(x): return re.sub(r'\s*;.*', '', x)
-                self.lines = map(f, self.lines)
+	def removeComments(self):
+		def f(x): return re.sub(r'\s*;.*', '', x)
+		self.lines = map(f, self.lines)
 
 	def removeBlockSkipLines(self):
 		def f(x):
@@ -63,30 +65,22 @@ class GCodeParser:
 			self.sequenceNumbers[int(m.group(1))] = i
 
 class GCodeInterpreter:
-	axes = [ 'X', 'Y', 'Z' ]
 	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G83' ]
 	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81', 'G83' ]
 
 	def __init__(self):
-		self.buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
 		self.offsets = [ 10.000, 10.000, 10.000 ]
 		self.position = [ 0, 0, 0 ]
 		self.incrPosition = [ 10.000, 10.000, 10.000 ]
 		self.stretch = 1.0
 		self.end = False
-		self.C = 8
-		self.D = 141
-		self.W = 100
 		self.absDistanceMode = True
 		self.absArcDistanceMode = False
 		self.firstMove = True
 		self.parameters = { }
 		self.plane = 'XY'
-		self.spindleEnable = True
-		self.spindleCCW = False
-		self.initialW100Stickyness = True
-		self.coolantEnable = False
 		self.invertZ = False
+		self.target = CNCCon.CNCConWriter()
 
 	def run(self, parser):
 		currentBlock = -1
@@ -104,8 +98,7 @@ class GCodeInterpreter:
 			for command in commands:
 				self.process(command)
 
-		self.buffer.append('E')
-		self.buffer.append('D0')
+		self.target.appendPostamble()
 
 	def splitBlock(self, blockStr):
 		instructions = []
@@ -116,7 +109,7 @@ class GCodeInterpreter:
 		for i in blockStr.split(' '):
 			if i == '': continue
 
-			if i[0] in self.axes:
+			if i[0] in self.target.axes:
 				axes.append(i)
 			elif cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
 				cur.append(i)
@@ -175,7 +168,8 @@ class GCodeInterpreter:
 		return blockStr
 
 	def process(self, insn):
-		try:
+		#try:
+		if 1:
 			if insn[0] in self.motionGroup:
 				self.currentMotionCommand = insn[0]
 
@@ -187,26 +181,21 @@ class GCodeInterpreter:
 				self.processT(insn)
 			else:
 				getattr(self, 'process%s' % insn[0].replace('.', '_'))(insn)
-		except AttributeError:
-			raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
+		#except AttributeError:
+		#	raise RuntimeError('Unsupported G-Code instruction: %s' % insn[0])
 
 	def processF(self, insn):  # set feed rate in units per minute
 		fr = float(self._getAddress('F', insn)) * self.stretch * 1000 / 60
-		self.buffer.append('E')
-		self.buffer.append('G21,%d' % fr)
-		self.buffer.append('G20,%d' % fr)
+		self.target.setFeedRate(fr)
 
-        def processS(self, insn):  # set spindle speed
-                self.D = min(255, round(float(self._getAddress('S', insn)) * .0141))
-		self.buffer.append('E')
-		self.buffer.append('D%d' % self.D)
-		self.buffer.append('W100')
+	def processS(self, insn):  # set spindle speed
+		self.target.setSpindleSpeed(min(255, round(float(self._getAddress('S', insn)) * .0141)))
 
-        def processT(self, insn):  # select tool
-                pass
+	def processT(self, insn):  # select tool
+		pass
 
-        def processG04(self, insn):  # dwell
-                pass
+	def processG04(self, insn):  # dwell
+		pass
 
 	def processG17(self, insn):  # plane = XY
 		self.plane = 'XY'
@@ -223,24 +212,24 @@ class GCodeInterpreter:
 	def processG21(self, insn):  # unit = mm
 		self.stretch = 1.00
 
-        def processG40(self, insn):  # disable tool radius compensation
-                pass
+	def processG40(self, insn):  # disable tool radius compensation
+		pass
 
-        def processG49(self, insn):  # disable tool length compensation
-                pass
+	def processG49(self, insn):  # disable tool length compensation
+		pass
 
-        def processG54(self, insn):  # select coordinate system 1
-                pass
+	def processG54(self, insn):  # select coordinate system 1
+		pass
 
-        def processG61(self, insn):  # exact path mode
-                pass
+	def processG61(self, insn):  # exact path mode
+		pass
 
 	def processG64(self, insn):  # path blending
 		# not supported, i.e. also not handled by WinPC-NC
 		pass
 
-        def processG80(self, insn):  # cancel modal motion
-                pass
+	def processG80(self, insn):  # cancel modal motion
+		pass
 
 	def processG90(self, insn):  # absolute distance mode
 		self.absDistanceMode = True
@@ -273,81 +262,26 @@ class GCodeInterpreter:
 		self._setSpindleSpeed(insn, None, False)
 
 	def processM6(self, insn):  # tool change (not supported)
-		self.buffer.append('E')
+		self.target.appendEmptyStep()
 
 	def processM7(self, insn):  # coolant on "mist"
-		self.buffer.append('E')
-		if not self.coolantEnable:
-			if not self.spindleEnable:
-				self.buffer.append('A52')
-			elif self.spindleCCW:
-				self.buffer.append('AD3')
-			else:
-				self.buffer.append('A53')
-		self.coolantEnable = True
+		self.target.setCoolantMist()
 
 	def processM8(self, insn):  # coolant on "flood"; equal behaviour in WinPC-NC
 		self.processM7(insn)
 
 	def processM9(self, insn):  # coolant off
-		self.buffer.append('E')
-		if self.coolantEnable:
-			if not self.spindleEnable:
-				self.buffer.append('A50')
-			elif self.spindleCCW:
-				self.buffer.append('AD1')
-			else:
-				self.buffer.append('A51')
-		self.coolantEnable = False
+		self.target.setCoolantOff()
 
 	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
-		# spindle speed setting of WinPC-NC writes W100 lines, however
-		# the global W-state doesn't seem to be modified, at least
-		# sub-sequent motions don't change W to the wanted value.
-		#self.W = 100
-
 		speed = None
-
 		if spindleEnable:
-                        S = self._getAddress('S', insn)
+			S = self._getAddress('S', insn)
 
-                        if S != None:
-                                speed = int(S)
-                                if speed: D = min(255, round(speed * .0141))
-
-		self.buffer.append('E')
-
-		if self.spindleEnable and not spindleEnable:  # turn spindle off
-			if self.spindleCCW:
-				self.buffer.append('AD2' if self.coolantEnable else 'AD0')
-			else:
-				self.buffer.append('A52' if self.coolantEnable else 'A50')
-
-		elif self.spindleCCW != spindleCCW or self.spindleEnable != spindleEnable:
-			self.spindleCCW = spindleCCW
-			if spindleCCW:
-				self.buffer.append('AD3' if self.coolantEnable else 'AD1')
-			else:
-				self.buffer.append('A53' if self.coolantEnable else 'A51')
-
-		if self.spindleEnable or not spindleEnable:
-			# don't write E if spindle was off and now turned on (for what reason!??)
-			self.buffer.append('E')
-
-		self.spindleEnable = spindleEnable
-		if not spindleEnable: return
-
-		self.buffer.append('W100')
-
-		if not speed: return
-
-		self.buffer.append('E')
-
-		if self.D == D: return
-		self.D = D
-
-		self.buffer.append('D%d' % self.D)
-		self.buffer.append('W100')
+			if S != None:
+				speed = int(S)
+				if speed: D = min(255, round(speed * .0141))
+		self.target.setSpindleSpeed(spindleCCW, spindleEnable, speed)
 
 	def processM30(self, insn):  # end program
 		self.end = True
@@ -393,61 +327,28 @@ class GCodeInterpreter:
 	def _straightMotionToTarget(self, target, rapid):
 		command = [ None ]
 		dist = 0
+		machinePos = [ None, None, None ]
+		needMove = False
 
 		for i in xrange(3):
 			if self.firstMove and not self.absDistanceMode and target[i] == None:
 				target[i] = self.incrPosition[i]
 
 			if target[i] != None and abs(target[i] - self.position[i]) > dist:
-				command[0] = 'V%d' % (i + 1)
+				#command[0] = 'V%d' % (i + 1)
+				longMoveAxe = i
 				dist = abs(target[i] - self.position[i])
 
 			if target[i] != None and target[i] != self.position[i]:
-				command.append('%s%d' % (self.axes[i], round(target[i] * 1000)))
+				machinePos[i] = round(target[i] * 1000)
+				needMove = True
 
-		if not rapid:
-			command[0] = 'V21'
-
-		if len(command) < 2:
+		if not needMove:
 			return
 
-		self.buffer.append('E')
-		self._setSpeed(rapid)
-		self.buffer.append(','.join(command))
+		self.target.straightMotion(rapid, longMoveAxe, machinePos)
 		self._mergeIntoPosition(target)
 		self.firstMove = False
-
-	def _setSpeed(self, rapid):
-		twice = False
-		if not rapid:
-			C = 8
-			W = 10
-			self.initialW100Stickyness = False
-		else:
-			if self.C == 8 and self.W == 100 and self.initialW100Stickyness:
-				# don't change C8 W100, whyever ...
-				return
-			else:
-				C = 10
-				W = 10
-				twice = True
-
-		if C != self.C or W != self.W:
-			if twice:
-				self.buffer.append('C%02d' % C)
-				self.buffer.append('W%d' % W)
-
-			if not self.firstMove:
-				self.buffer.append('E')
-
-			self.buffer.append('C%02d' % C)
-			self.buffer.append('W%d' % W)
-
-			self.C = C
-			self.W = W
-
-
-
 
 	def processG0(self, insn):  # rapid motion
 		self._straightMotion(insn, True)
@@ -573,9 +474,7 @@ class GCodeInterpreter:
 		# WinPC-NC seems to always ceil the value, for whatever reason ...
 		p = math.ceil(p)
 
-		self.buffer.append('E')
-		self._setSpeed(False)  # always "slow" motion
-		self.buffer.append('K21,x%d,y%d,p%d' % (x, y, p))
+		self.target.circleMotion(x, y, p)
 		self._mergeIntoPosition(target)
 		self.firstMove = False
 
