@@ -1,13 +1,9 @@
-from ui.MainWindow import Ui_MainWindow
 from PySide import QtGui, QtCore
-from Converters import GCode
-
-from Control.MachineStatus import ControlMachineStatus
-from Control.GraphicsView import ControlGraphicsView
 
 class ControlMainWindow(QtGui.QMainWindow):
 	storeButtonUsed = False
 	_gv = None
+	_parser = None
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
@@ -57,6 +53,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	def showGraphicsView(self):
 		if self._gv == None:
 			self._gv = ControlGraphicsView()
+			self._gv.render(self._parser)
 			self._gv.show()
 
 
@@ -221,3 +218,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self._status.manualMove(axis, positive, 10000, fast)
 		elif self._ui.drive100mm.isChecked():
 			self._status.manualMove(axis, positive, 100000, fast)
+
+from Converters import GCode
+from Control.MachineStatus import ControlMachineStatus
+from Control.GraphicsView import ControlGraphicsView
+from ui.MainWindow import Ui_MainWindow

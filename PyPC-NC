@@ -1,7 +1,7 @@
 #! /usr/bin/python
+from Control.MainWindow import ControlMainWindow
 import Chat
 import Chat.Backends
-from Control import *
 
 from PySide import QtGui, QtCore
 import sys

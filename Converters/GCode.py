@@ -68,7 +68,7 @@ class GCodeInterpreter:
 	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G83' ]
 	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81', 'G83' ]
 
-	def __init__(self):
+	def __init__(self, target):
 		self.offsets = [ 10.000, 10.000, 10.000 ]
 		self.position = [ 0, 0, 0 ]
 		self.incrPosition = [ 10.000, 10.000, 10.000 ]
@@ -80,7 +80,7 @@ class GCodeInterpreter:
 		self.parameters = { }
 		self.plane = 'XY'
 		self.invertZ = False
-		self.target = CNCCon.CNCConWriter()
+		self.target = target
 
 	def run(self, parser):
 		currentBlock = -1
