@@ -253,13 +253,13 @@ class GCodeInterpreter:
 		self.end = True
 
 	def processM3(self, insn):  # start spindle clockwise
-		self._setSpindleSpeed(insn, False, True)
+		self._setSpindleConfig(insn, False, True)
 
 	def processM4(self, insn):  # start spindle ccw
-		self._setSpindleSpeed(insn, True, True)
+		self._setSpindleConfig(insn, True, True)
 
 	def processM5(self, insn):  # stop spindle
-		self._setSpindleSpeed(insn, None, False)
+		self._setSpindleConfig(insn, None, False)
 
 	def processM6(self, insn):  # tool change (not supported)
 		self.target.appendEmptyStep()
@@ -273,7 +273,7 @@ class GCodeInterpreter:
 	def processM9(self, insn):  # coolant off
 		self.target.setCoolantOff()
 
-	def _setSpindleSpeed(self, insn, spindleCCW, spindleEnable):
+	def _setSpindleConfig(self, insn, spindleCCW, spindleEnable):
 		speed = None
 		if spindleEnable:
 			S = self._getAddress('S', insn)
@@ -281,7 +281,7 @@ class GCodeInterpreter:
 			if S != None:
 				speed = int(S)
 				if speed: D = min(255, round(speed * .0141))
-		self.target.setSpindleSpeed(spindleCCW, spindleEnable, speed)
+		self.target.setSpindleConfig(spindleCCW, spindleEnable, speed)
 
 	def processM30(self, insn):  # end program
 		self.end = True

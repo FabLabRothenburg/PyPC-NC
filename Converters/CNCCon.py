@@ -52,7 +52,7 @@ class CNCConWriter:
 				self.buffer.append('A51')
 		self.coolantEnable = False
 
-	def setSpindleSpeed(self, spindleCCW, spindleEnable, speed):
+	def setSpindleConfig(self, spindleCCW, spindleEnable, speed):
 		# spindle speed setting of WinPC-NC writes W100 lines, however
 		# the global W-state doesn't seem to be modified, at least
 		# sub-sequent motions don't change W to the wanted value.
