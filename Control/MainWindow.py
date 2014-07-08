@@ -1,5 +1,6 @@
 from ui.MainWindow import Ui_MainWindow
 from PySide import QtGui, QtCore
+from Converters import GCode
 
 from Control.MachineStatus import ControlMachineStatus
 from Control.GraphicsView import ControlGraphicsView
@@ -20,6 +21,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.stop.clicked.connect(self._status.stop)
 		self._ui.refMovement.clicked.connect(self._status.refMovement)
 		self._ui.importGCode.clicked.connect(self.importGCode)
+		self._ui.run.clicked.connect(self.run)
+		self._ui.showGraphicsView.clicked.connect(self.showGraphicsView)
 
 		self._ui.gotoOther.setMenu(self._ui.menuGoto)
 		self._ui.storeOther.setMenu(self._ui.menuStore)
@@ -47,7 +50,6 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.driveUDown.clicked.connect(self.driveUDown)
 
 		self._ui.feedRateOverride.valueChanged.connect(self.feedRateOverrideChanged)
-		self._ui.showGraphicsView.clicked.connect(self.showGraphicsView)
 
 		self._status.updateStatus()
 
@@ -89,6 +91,22 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def importGCode(self):
+		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
+		if filename[0] == '': return
+
+		parser = GCode.GCodeParser()
+		parser.readFile(filename[0])
+		parser.removeTapeMarkers()
+		parser.removeComments()
+		parser.removeInlineComments()
+		parser.removeBlockSkipLines()
+		parser.normalizeAddressWhitespace()
+		parser.readSequenceNumbers()
+
+		self._parser = parser
+
+	@QtCore.Slot()
+	def run(self):
 		if not self._status.status & 0x04:
 		        reply = QtGui.QMessageBox.question(self, 'G-Code Import',
 			            'Are you sure to import G-Code without reference movement?',
@@ -105,10 +123,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 			if reply == QtGui.QMessageBox.No:
 				return
 
-		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
-		if filename[0] == '': return
-
-		self._status.importGCode(filename[0], self._ui.invertZ.isChecked())
+		self._status.importGCode(self._parser, self._ui.invertZ.isChecked())
 
 	@QtCore.Slot(int)
 	def feedRateOverrideChanged(self, value):

@@ -782,7 +782,14 @@
       <item>
        <widget class="QPushButton" name="importGCode">
         <property name="text">
-         <string>Import G-Code</string>
+         <string>Import G-Code ...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="run">
+        <property name="text">
+         <string>Run</string>
         </property>
        </widget>
       </item>

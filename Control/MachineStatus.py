@@ -303,16 +303,7 @@ class ControlMachineStatus(QtCore.QObject):
 		self.totalSteps = 0
 
 
-	def importGCode(self, fname, invertZ):
-		parser = GCode.GCodeParser()
-		parser.readFile(fname)
-		parser.removeTapeMarkers()
-		parser.removeComments()
-		parser.removeInlineComments()
-		parser.removeBlockSkipLines()
-		parser.normalizeAddressWhitespace()
-		parser.readSequenceNumbers()
-
+	def importGCode(self, parser, invertZ):
 		inter = GCode.GCodeInterpreter()
 		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
 		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
