@@ -78,13 +78,13 @@ class MyGraphicsView(QtGui.QGraphicsView):
 	def __init__(self, parent):
 		super(MyGraphicsView, self).__init__(parent)
 
-        def mousePressEvent(self, event):
+	def mousePressEvent(self, event):
 		self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-                super(MyGraphicsView, self).mousePressEvent(event)
+		super(MyGraphicsView, self).mousePressEvent(event)
 
-        def mouseReleaseEvent(self, event):
+	def mouseReleaseEvent(self, event):
 		self.setDragMode(QtGui.QGraphicsView.NoDrag)
-                super(MyGraphicsView, self).mouseReleaseEvent(event)
+		super(MyGraphicsView, self).mouseReleaseEvent(event)
 
 	def wheelEvent(self,  event):
 		factor = 1.2;
