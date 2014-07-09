@@ -8,6 +8,13 @@ class ControlGraphicsView(QtGui.QDialog):
 		self._ui = Ui_GraphicsViewWindow()
 		self._ui.setupUi(self)
 
+		self._ui.markOrigin.clicked.connect(self.markOrigin)
+
+	@QtCore.Slot()
+	def markOrigin(self):
+		pos = self._scene.getCursorPosition()
+		self._scene.setCrosshairPosition(pos)
+
 	def render(self, parser):
 		self._scene = MyGraphicsScene()
 
@@ -72,11 +79,20 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		d = self._cursor.rect().width()
 		self._cursor.setRect(pos.x() - d / 2, pos.y() - d / 2, d, d)
 
+	def getCursorPosition(self):
+		oldr = self._cursor.rect().width() / 2
+		return QtCore.QPointF(self._cursor.rect().x() + oldr, self._cursor.rect().y() + oldr)
+
 	def setCursorRadius(self, newr):
 		oldr = self._cursor.rect().width() / 2
 		x = self._cursor.rect().x() + oldr
 		y = self._cursor.rect().y() + oldr
 		self._cursor.setRect(x - newr, y - newr, newr * 2, newr * 2)
+
+	def setCrosshairPosition(self, pos):
+		newr = self._crossHairH.line().dx() / 2
+		self._crossHairH.setLine(pos.x() - newr, pos.y(), pos.x() + newr, pos.y())
+		self._crossHairV.setLine(pos.x(), pos.y() - newr, pos.x(), pos.y() + newr)
 
 	def setCrosshairSize(self, newr, linew):
 		oldr = self._crossHairH.line().dx() / 2
