@@ -27,11 +27,15 @@ class ControlGraphicsView(QtGui.QDialog):
 		bbox.setRight(bbox.right() + bbox.width() * 0.1)
 		self._scene.setSceneRect(bbox)
 		self._ui.graphicsView.fitInView(bbox, QtCore.Qt.KeepAspectRatio)
-		self._ui.graphicsView.autoconfCursorRadius()  # @fixme wait for initial resize
+		self._ui.graphicsView.autoconfSizes()  # @fixme wait for initial resize
 
 class MyGraphicsScene(QtGui.QGraphicsScene):
 	def __init__(self):
 		super(MyGraphicsScene, self).__init__()
+
+		pen = QtGui.QPen(QtCore.Qt.GlobalColor.blue)
+		self._crossHairV = self.addLine(0, 0, 0, 0, pen)
+		self._crossHairH = self.addLine(0, 0, 0, 0, pen)
 
 		pen = QtGui.QPen(QtCore.Qt.GlobalColor.red)
 		brush = QtGui.QBrush(QtCore.Qt.GlobalColor.red)
@@ -74,6 +78,19 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		y = self._cursor.rect().y() + oldr
 		self._cursor.setRect(x - newr, y - newr, newr * 2, newr * 2)
 
+	def setCrosshairSize(self, newr, linew):
+		oldr = self._crossHairH.line().dx() / 2
+		x = self._crossHairH.line().x1() + oldr
+		y = self._crossHairV.line().y1() + oldr
+
+		pen = QtGui.QPen(QtCore.Qt.GlobalColor.blue)
+		pen.setWidth(linew)
+
+		self._crossHairH.setLine(x - newr, y, x + newr, y)
+		self._crossHairH.setPen(pen)
+		self._crossHairV.setLine(x, y - newr, x, y + newr)
+		self._crossHairV.setPen(pen)
+
 class MyGraphicsView(QtGui.QGraphicsView):
 	def __init__(self, parent):
 		super(MyGraphicsView, self).__init__(parent)
@@ -91,13 +108,16 @@ class MyGraphicsView(QtGui.QGraphicsView):
 		if event.delta() < 0:
 			factor = 1.0 / factor
 		self.scale(factor, factor)
-		self.autoconfCursorRadius()
+		self.autoconfSizes()
 
-	def autoconfCursorRadius(self):
+	def autoconfSizes(self):
 		bbox = self.mapToScene(self.viewport().geometry()).boundingRect()
 		r = 4 * bbox.width() / self.rect().width()
 		self.scene().setCursorRadius(r)
 
+		r = 20 * bbox.width() / self.rect().width()
+		lw = 3 * bbox.width() / self.rect().width()
+		self.scene().setCrosshairSize(r, lw)
 
 
 
