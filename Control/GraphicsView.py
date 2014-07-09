@@ -18,7 +18,6 @@ class ControlGraphicsView(QtGui.QDialog):
 		inter.run(parser)
 
 		self._ui.graphicsView.setScene(self._scene)
-		self._ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
 
 		bbox = self._scene.itemsBoundingRect()
 		bbox.setTop(bbox.top() - bbox.height() * 0.1)
@@ -31,6 +30,14 @@ class ControlGraphicsView(QtGui.QDialog):
 class MyGraphicsView(QtGui.QGraphicsView):
 	def __init__(self, parent):
 		super(MyGraphicsView, self).__init__(parent)
+
+        def mousePressEvent(self, event):
+		self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+                super(MyGraphicsView, self).mousePressEvent(event)
+
+        def mouseReleaseEvent(self, event):
+		self.setDragMode(QtGui.QGraphicsView.NoDrag)
+                super(MyGraphicsView, self).mouseReleaseEvent(event)
 
 	def wheelEvent(self,  event):
 		factor = 1.2;
