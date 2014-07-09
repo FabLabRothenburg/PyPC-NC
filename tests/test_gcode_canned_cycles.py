@@ -1,9 +1,10 @@
 import unittest
 from Converters import GCode
+from Converters import CNCCon
 
 class TestDrillingCycle(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
+		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		self.i.target.buffer = []
 
 		# we assume that lower Z values are closer to the workpiece

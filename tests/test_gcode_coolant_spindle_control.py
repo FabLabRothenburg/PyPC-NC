@@ -1,15 +1,16 @@
 import unittest
 from Converters import GCode
+from Converters import CNCCon
 
 class TestInterpreterCoolantControl(unittest.TestCase):
 	def test_M7(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M7' ])
 		self.assertEqual(i.target.buffer, [ 'E', 'A53' ])
 
 	def test_M7repeat(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M7' ])
 		i.process([ 'M7' ])
@@ -17,13 +18,13 @@ class TestInterpreterCoolantControl(unittest.TestCase):
 		self.assertEqual(i.target.buffer, [ 'E', 'A53', 'E', 'E' ])
 
 	def test_M8(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M8' ])
 		self.assertEqual(i.target.buffer, [ 'E', 'A53' ])
 
 	def test_M8repeat(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M8' ])
 		i.process([ 'M8' ])
@@ -31,14 +32,14 @@ class TestInterpreterCoolantControl(unittest.TestCase):
 		self.assertEqual(i.target.buffer, [ 'E', 'A53', 'E', 'E' ])
 
 	def test_M9(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.target.coolantEnable = True
 		i.process([ 'M9' ])
 		self.assertEqual(i.target.buffer, [ 'E', 'A51' ])
 
 	def test_M9repeat(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.target.coolantEnable = True
 		i.process([ 'M9' ])
@@ -47,13 +48,13 @@ class TestInterpreterCoolantControl(unittest.TestCase):
 		self.assertEqual(i.target.buffer, [ 'E', 'A51', 'E', 'E' ])
 
 	def test_M9_initiallyOff(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M9' ])
 		self.assertEqual(i.target.buffer, [ 'E' ])
 
 	def test_M8M9_with_CCW_spindle(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M4', 'S3000' ])
 		i.process([ 'M8' ])
@@ -67,7 +68,7 @@ class TestInterpreterCoolantControl(unittest.TestCase):
 
 class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 	def test_spindleControl_with_CCW_spindle(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M4', 'S3000' ])
 		i.process([ 'M8' ])
@@ -84,7 +85,7 @@ class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 		])
 
 	def test_spindleControl_with_CW_spindle(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S3000' ])
 		i.process([ 'M8' ])
@@ -101,7 +102,7 @@ class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 		])
 
 	def test_coolantControl_with_spindle_off(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M5' ])
 		i.process([ 'M7' ])
@@ -115,13 +116,13 @@ class TestInterpreterSpindleCoolantCombinations(unittest.TestCase):
 
 class TestInterpreterSpindleSpeed(unittest.TestCase):
 	def test_M3(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S3000' ])
 		self.assertEqual(i.target.buffer, [ 'E', 'E', 'W100', 'E', 'D42', 'W100' ])
 
 	def test_M3_multi(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S0' ])
 		i.process([ 'M3', 'S1000' ])
@@ -150,7 +151,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M4(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S8000' ])
 		i.process([ 'M4', 'S5000' ])
@@ -165,7 +166,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M5ccw(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S8000' ])
 		i.process([ 'M4', 'S5000' ])
@@ -181,7 +182,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 
 
 	def test_M5cw(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.process([ 'M3', 'S8000' ])
 		i.process([ 'M5' ])
@@ -195,7 +196,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 
 
 	def test_M3_W100_behaviour_G0(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.position = [ 0, 0, 0 ]
 		i.offsets = [ 30, 30, 10 ]
@@ -214,7 +215,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M3_W100_behaviour_G1G0G1G0(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.position = [ 0, 0, 0 ]
 		i.offsets = [ 30, 30, 10 ]
@@ -233,7 +234,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M3_W100_behaviour_G0G1G1G0G1(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.position = [ 0, 0, 0 ]
 		i.offsets = [ 30, 30, 10 ]
@@ -255,7 +256,7 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 
 
 	def test_M3_W100_behaviour_G0G1M3G1G0G1(self):
-		i = GCode.GCodeInterpreter()
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		i.target.buffer = []
 		i.position = [ 0, 0, 0 ]
 		i.offsets = [ 30, 30, 10 ]

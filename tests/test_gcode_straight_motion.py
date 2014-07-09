@@ -1,9 +1,10 @@
 import unittest
 from Converters import GCode
+from Converters import CNCCon
 
 class TestRapidMotionG0(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
+		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		self.i.target.buffer = []
 		self.i.position = [ 5.000, 0.0, 2.000 ]
 
@@ -78,7 +79,7 @@ class TestRapidMotionG0(unittest.TestCase):
 
 class WriteZOnFirstMove(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
+		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		self.i.target.buffer = []
 		self.i.position = [ 9.000, 9.000, 0.000 ]
 
@@ -97,7 +98,7 @@ class WriteZOnFirstMove(unittest.TestCase):
 
 class TestCoordinatedMotionG1(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
+		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		self.i.target.buffer = []
 		self.i.position = [ 5.000, 0.0, 2.000 ]
 
@@ -124,7 +125,7 @@ class TestCoordinatedMotionG1(unittest.TestCase):
 
 class TestG0G1Switching(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter()
+		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		self.i.target.buffer = []
 		self.i.position = [ 9.000, 9.000, 0.000 ]
 
