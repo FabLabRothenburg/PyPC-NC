@@ -21,7 +21,12 @@ class ControlGraphicsView(QtGui.QDialog):
 		self._ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
 
 		bbox = self._scene.itemsBoundingRect()
-		self._ui.graphicsView.fitInView(bbox)
+		bbox.setTop(bbox.top() - bbox.height() * 0.1)
+		bbox.setBottom(bbox.bottom() + bbox.height() * 0.1)
+		bbox.setLeft(bbox.left() - bbox.width() * 0.1)
+		bbox.setRight(bbox.right() + bbox.width() * 0.1)
+		self._scene.setSceneRect(bbox)
+		self._ui.graphicsView.fitInView(bbox, QtCore.Qt.KeepAspectRatio)
 
 class MyGraphicsView(QtGui.QGraphicsView):
 	def __init__(self, parent):
@@ -57,7 +62,7 @@ class SceneRenderer:
 		newy = self._y if machinePos[1] == None else machinePos[1]
 
 		if not rapid:
-			self._scene.addLine(self._x, self._y, newx, newy)
+			self._scene.addLine(self._x, -self._y, newx, -newy)
 
 		self._x = newx
 		self._y = newy
