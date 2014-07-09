@@ -52,7 +52,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	@QtCore.Slot()
 	def showGraphicsView(self):
 		if self._gv == None:
-			self._gv = ControlGraphicsView()
+			self._gv = ControlGraphicsView(self._status)
 			self._gv.render(self._parser)
 			self._gv.show()
 

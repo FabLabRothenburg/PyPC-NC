@@ -218,6 +218,24 @@ class ControlMachineStatus(QtCore.QObject):
 
 		setattr(self, 'moving' + axis, True)
 
+        def gotoXY(self, x, y):
+		if not self._preparedManualMove:
+			self.prepareManualMove()
+
+		steps = []
+		if (x + self.wpX) != self.pX:
+			steps.append('x%d' % (self.wpX + x - self.pX))
+			self.movingX = True
+		if (y + self.wpY) != self.pY:
+			steps.append('y%d' % (self.wpY + y - self.pY))
+			self.movingY = True
+
+		if not steps:
+			return
+
+		self.cts()
+		self._chatBackend.send('$E80,' + ','.join(steps))
+
 	def startProgrammedMotion(self):
 		commands = [
 			'@M0',

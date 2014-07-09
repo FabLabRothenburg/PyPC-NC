@@ -2,18 +2,27 @@ import math
 from PySide import QtGui, QtCore
 
 class ControlGraphicsView(QtGui.QDialog):
-	def __init__(self):
+	def __init__(self, status):
+		self._status = status
+
 		super(ControlGraphicsView, self).__init__(None)
 
 		self._ui = Ui_GraphicsViewWindow()
 		self._ui.setupUi(self)
 
 		self._ui.markOrigin.clicked.connect(self.markOrigin)
+		self._ui.gotoXY.clicked.connect(self.gotoXY)
 
 	@QtCore.Slot()
 	def markOrigin(self):
 		pos = self._scene.getCursorPosition()
 		self._scene.setCrosshairPosition(pos)
+
+	@QtCore.Slot()
+	def gotoXY(self):
+		pos = self._scene.getCursorPosition()
+		origin = self._scene.getCrosshairPosition()
+		self._status.gotoXY(pos.x() - origin.x(), pos.y() - origin.y())
 
 	def render(self, parser):
 		self._scene = MyGraphicsScene()
@@ -93,6 +102,10 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		newr = self._crossHairH.line().dx() / 2
 		self._crossHairH.setLine(pos.x() - newr, pos.y(), pos.x() + newr, pos.y())
 		self._crossHairV.setLine(pos.x(), pos.y() - newr, pos.x(), pos.y() + newr)
+
+	def getCrosshairPosition(self):
+		r = self._crossHairH.line().dx() / 2
+		return QtCore.QPointF(self._crossHairH.line().x1() + r, self._crossHairV.line().y1() + r)
 
 	def setCrosshairSize(self, newr, linew):
 		oldr = self._crossHairH.line().dx() / 2
