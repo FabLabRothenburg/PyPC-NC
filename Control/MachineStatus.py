@@ -1,5 +1,6 @@
 from PySide import QtGui, QtCore
 from Converters import GCode
+from Converters import CNCCon
 
 class ControlMachineStatus(QtCore.QObject):
 	status = None
@@ -322,7 +323,7 @@ class ControlMachineStatus(QtCore.QObject):
 
 
 	def importGCode(self, parser, invertZ):
-		inter = GCode.GCodeInterpreter()
+		inter = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
 		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
 		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
 		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
