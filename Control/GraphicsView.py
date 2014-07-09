@@ -2,6 +2,8 @@ import math
 from PySide import QtGui, QtCore
 
 class ControlGraphicsView(QtGui.QDialog):
+	closed = QtCore.Signal()
+
 	def __init__(self, status):
 		self._status = status
 
@@ -12,6 +14,7 @@ class ControlGraphicsView(QtGui.QDialog):
 
 		self._ui.markOrigin.clicked.connect(self.markOrigin)
 		self._ui.gotoXY.clicked.connect(self.gotoXY)
+		self._ui.closeButton.clicked.connect(self.close)
 
 	@QtCore.Slot()
 	def markOrigin(self):
@@ -23,6 +26,10 @@ class ControlGraphicsView(QtGui.QDialog):
 		pos = self._scene.getCursorPosition()
 		origin = self._scene.getCrosshairPosition()
 		self._status.gotoXY(pos.x() - origin.x(), pos.y() - origin.y())
+
+	def closeEvent(self, event):
+		self.closed.emit()
+		event.accept()
 
 	def render(self, parser):
 		self._scene = MyGraphicsScene()

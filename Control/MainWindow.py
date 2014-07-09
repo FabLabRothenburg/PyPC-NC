@@ -55,6 +55,11 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self._gv = ControlGraphicsView(self._status)
 			self._gv.render(self._parser)
 			self._gv.show()
+                        self._gv.closed.connect(self.graphicsViewClosed)
+
+        @QtCore.Slot()
+        def graphicsViewClosed(self):
+                self._gv = None
 
 
 	@QtCore.Slot()
