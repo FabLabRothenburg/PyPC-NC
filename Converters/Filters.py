@@ -15,7 +15,9 @@ class FilterChain:
 		self._writer.straightMotion(rapid, longMoveAxe, pos)
 
 	def circleMotion(self, x, y, p):
-		pass
+		for filter in self.__dict__['_filters']:
+			(x, y, p) = filter.circleMotion(x, y, p)
+		self._writer.circleMotion(x, y, p)
 
 class OffsetFilter:
 	def __init__(self, offsets):
@@ -26,3 +28,9 @@ class OffsetFilter:
 			if pos[i] != None:
 				pos[i] += self._offsets[i]
 		return pos
+
+	def circleMotion(self, x, y, p):
+		# circles are addressed relatively, hence no need for offset correction
+		#x += self._offsets[0]
+		#y += self._offsets[1]
+		return (x, y, p)

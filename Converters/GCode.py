@@ -387,7 +387,7 @@ class GCodeInterpreter:
 		radius = self._getAddress('R', insn)
 
 		if self.absDistanceMode:
-			target = self._vectorAdd(move, self.offsets)
+			target = move
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
@@ -430,8 +430,8 @@ class GCodeInterpreter:
 			j = self._getAddress('J', insn)
 
 			if self.absArcDistanceMode:
-				xc = self.offsets[0] + float(i) * self.stretch
-				yc = self.offsets[1] + float(j) * self.stretch
+				xc = float(i) * self.stretch
+				yc = float(j) * self.stretch
 			else:
 				if i:
 					xc = self.position[0] + float(i) * self.stretch
