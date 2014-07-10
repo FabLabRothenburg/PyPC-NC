@@ -1,12 +1,15 @@
 import unittest
-from Converters import GCode
-from Converters import CNCCon
+from Converters import GCode, CNCCon, Filters
 
 class TestRapidMotionG0(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 5.000, 0.0, 2.000 ]
+		self.i.position = [ -5.000, -10.0, -8.000 ]
 
 	def test_G0_simpleX0(self):
 		self.i.process([ 'G0', 'X0' ])
@@ -35,7 +38,7 @@ class TestRapidMotionG0(unittest.TestCase):
 		self.assertEqual(self.i.target.buffer, [ 'E', 'V2,X10000,Y10000' ])
 
 	def test_G0_simpleXY0_Xlonger(self):
-		self.i.position = [ 5.000, 9.500, 2.000 ]
+		self.i.position = [ -5.000, -0.500, -8.000 ]
 		self.i.process([ 'G0', 'X0', 'Y0' ])
 		self.assertEqual(self.i.target.buffer, [ 'E', 'V1,X10000,Y10000' ])
 
@@ -79,9 +82,13 @@ class TestRapidMotionG0(unittest.TestCase):
 
 class WriteZOnFirstMove(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 9.000, 9.000, 0.000 ]
+		self.i.position = [ -1.000, -1.000, -10.000 ]
 
 	def test_firstMove(self):
 		self.i.process([ 'G91' ])
@@ -98,9 +105,13 @@ class WriteZOnFirstMove(unittest.TestCase):
 
 class TestCoordinatedMotionG1(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 5.000, 0.0, 2.000 ]
+		self.i.position = [ -5.000, -10.0, -8.000 ]
 
 	def test_G1_simpleX0(self):
 		self.i.process([ 'G1', 'X0' ])
@@ -125,9 +136,13 @@ class TestCoordinatedMotionG1(unittest.TestCase):
 
 class TestG0G1Switching(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 9.000, 9.000, 0.000 ]
+		self.i.position = [ -1.000, -1.000, -10.000 ]
 
 	def test_G0G1G0(self):
 		self.i.process([ 'G0', 'X0', 'Y0' ])

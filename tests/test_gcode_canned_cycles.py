@@ -1,10 +1,13 @@
 import unittest
-from Converters import GCode
-from Converters import CNCCon
+from Converters import GCode, CNCCon, Filters
 
 class TestDrillingCycle(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
 
 		# we assume that lower Z values are closer to the workpiece
@@ -20,7 +23,7 @@ class TestDrillingCycle(unittest.TestCase):
 		self.assertEqual(self.i.retractToOldZ, False)
 
 	def test_absolutePosition(self):
-		self.i.position = [ 11.000, 12.000, 7.000 ]
+		self.i.position = [ 1.000, 2.000, -3.000 ]
 		self.i.process([ 'G90' ])  # abs distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8' ])
@@ -40,7 +43,7 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_absolutePosition_RgtZ(self):
-		self.i.position = [ 10.000, 10.000, 10.000 ]
+		self.i.position = [ 0.000, 0.000, 0.000 ]
 		self.i.process([ 'G90' ])  # abs distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8' ])
@@ -60,7 +63,7 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_absolutePositionL2(self):
-		self.i.position = [ 11.000, 12.000, 7.000 ]
+		self.i.position = [ 1.000, 2.000, -3.000 ]
 		self.i.process([ 'G90' ])  # abs distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G81', 'X4', 'Y5', 'Z1.5', 'R2.8', 'L3' ])
@@ -100,8 +103,8 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_relativePosition(self):
-		self.i.position = [ 11.000, 12.000, 7.000 ]
-		self.i.incrPosition = [ 11.000, 12.000, 7.000 ]
+		self.i.position = [ 1.000, 2.000, -3.000 ]
+		self.i.incrPosition = [ 1.000, 2.000, -3.000 ]
 		self.i.firstMove = False
 		self.i.process([ 'G91' ])  # relative distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
@@ -145,8 +148,6 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_relativePositionRgtZ(self):
-		self.i.position = [ 10.000, 10.000, 10.000 ]
-		self.i.incrPosition = [ 10.000, 10.000, 10.000 ]
 		self.i.firstMove = False
 		self.i.process([ 'G91' ])  # relative distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
@@ -168,7 +169,7 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_absolutePositionPeckDrill(self):
-		self.i.position = [ 11.000, 12.000, 7.000 ]
+		self.i.position = [ 1.000, 2.000, -3.000 ]
 		self.i.process([ 'G90' ])  # abs distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
 		self.i.process([ 'G83', 'X4', 'Y5', 'Z1.5', 'R2.8', 'Q1.0' ])
@@ -197,8 +198,8 @@ class TestDrillingCycle(unittest.TestCase):
 		])
 
 	def test_relativePositionPeckDrill(self):
-		self.i.position = [ 11.000, 12.000, 7.000 ]
-		self.i.incrPosition = [ 11.000, 12.000, 7.000 ]
+		self.i.position = [ 1.000, 2.000, -3.000 ]
+		self.i.incrPosition = [ 1.000, 2.000, -3.000 ]
 		self.i.firstMove = False
 		self.i.process([ 'G91' ])  # relative distance mode
 		self.i.process([ 'G98' ])  # retract to old Z
