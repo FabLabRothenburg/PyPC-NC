@@ -197,7 +197,6 @@ class ProgrammedMotionController(QtCore.QObject):
 	_sentSteps = 0
 	_totalSteps = 0
 	_feedRateOverride = 100
-	_filters = []
 
 	def __init__(self, machine):
 		QtCore.QObject.__init__(self)
@@ -244,19 +243,14 @@ class ProgrammedMotionController(QtCore.QObject):
 		else:
 			self._end()
 
-	def importGCode(self, parser, invertZ):
-		fc = Filters.FilterChain(self._filters, CNCCon.CNCConWriter())
-		inter = GCode.GCodeInterpreter(fc)
-		inter.invertZ = invertZ
-		inter.run(parser)
-
-		self._buffer = inter.target.buffer
+	def setCommands(self, commands):
+		self._buffer = commands
 		for command in self._buffer:
 			if command == 'E': self._totalSteps += 1
 
-                self._timer = QtCore.QTimer(self)
-                self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
-                self._timer.start(1000)
+		self._timer = QtCore.QTimer(self)
+		self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
+		self._timer.start(1000)
 
 		self._machine.machineStatus().setXYZMoving()
 		self._run()

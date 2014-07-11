@@ -131,9 +131,23 @@ class ControlMainWindow(QtGui.QMainWindow):
 			if reply == QtGui.QMessageBox.No:
 				return
 
+		filters = [
+			Filters.OffsetFilter(self._workpiecePos)
+		]
+
+		fc = Filters.FilterChain(filters, CNCCon.CNCConWriter())
+		inter = GCode.GCodeInterpreter(fc)
+		inter.position = [
+			self._machine.machineStatus().x() - self._workpiecePos[0],
+			self._machine.machineStatus().y() - self._workpiecePos[1],
+			self._machine.machineStatus().z() - self._workpiecePos[2]
+		]
+		inter.invertZ = self._ui.invertZ.isChecked()
+		inter.run(self._parser)
+
 		self._machine.setAction(ProgrammedMotionController(self._machine))
 		self._machine.action().setFeedRateOverride(self._ui.feedRateOverride.value())
-		self._machine.action().importGCode(self._parser, self._ui.invertZ.isChecked())
+		self._machine.action().setCommands(inter.target.buffer)
 
 	@QtCore.Slot(int)
 	def feedRateOverrideChanged(self, value):
