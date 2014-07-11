@@ -19,8 +19,8 @@ class ControlGraphicsView(QtGui.QDialog):
 
 	@QtCore.Slot()
 	def markOrigin(self):
-		pos = self._scene.getCursorPosition()
-		self._scene.setCrosshairPosition(pos)
+		(x, y) = self._scene.getCursorPosition()
+		self._scene.setCrosshairPosition(x, y)
 
 	@QtCore.Slot()
 	def gotoXY(self):
@@ -29,11 +29,11 @@ class ControlGraphicsView(QtGui.QDialog):
 		elif not isinstance(self._machine.action(), ManualMotionController):
 			self._machine.setAction(ManualMotionController(self._machine))
 
-		pos = self._scene.getCursorPosition()
-		origin = self._scene.getCrosshairPosition()
+		(posX, posY) = self._scene.getCursorPosition()
+		(orgX, orgY) = self._scene.getCrosshairPosition()
 		workpiecePos = self._mainwin.workpiecePos()
 
-		self._machine.action().gotoXYZ(pos.x() - origin.x() + workpiecePos[0], pos.y() - origin.y() + workpiecePos[1])
+		self._machine.action().gotoXYZ(posX - orgX + workpiecePos[0], posY - orgY + workpiecePos[1])
 
 
 	def closeEvent(self, event):
@@ -98,15 +98,15 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 					maxDist = dist
 					selPos = point
 
-		self.setCursorPosition(selPos)
+		self.setCursorPosition(selPos.x(), -selPos.y())
 
-	def setCursorPosition(self, pos):
+	def setCursorPosition(self, x, y):
 		d = self._cursor.rect().width()
-		self._cursor.setRect(pos.x() - d / 2, pos.y() - d / 2, d, d)
+		self._cursor.setRect(x - d / 2, -y - d / 2, d, d)
 
 	def getCursorPosition(self):
 		oldr = self._cursor.rect().width() / 2
-		return QtCore.QPointF(self._cursor.rect().x() + oldr, self._cursor.rect().y() + oldr)
+		return (self._cursor.rect().x() + oldr, -(self._cursor.rect().y() + oldr))
 
 	def setCursorRadius(self, newr):
 		oldr = self._cursor.rect().width() / 2
@@ -114,14 +114,14 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		y = self._cursor.rect().y() + oldr
 		self._cursor.setRect(x - newr, y - newr, newr * 2, newr * 2)
 
-	def setCrosshairPosition(self, pos):
+	def setCrosshairPosition(self, x, y):
 		newr = self._crossHairH.line().dx() / 2
-		self._crossHairH.setLine(pos.x() - newr, pos.y(), pos.x() + newr, pos.y())
-		self._crossHairV.setLine(pos.x(), pos.y() - newr, pos.x(), pos.y() + newr)
+		self._crossHairH.setLine(x - newr, -y, x + newr, -y)
+		self._crossHairV.setLine(x, -y - newr, x, -y + newr)
 
 	def getCrosshairPosition(self):
 		r = self._crossHairH.line().dx() / 2
-		return QtCore.QPointF(self._crossHairH.line().x1() + r, self._crossHairV.line().y1() + r)
+		return (self._crossHairH.line().x1() + r, -(self._crossHairV.line().y1() + r))
 
 	def setCrosshairSize(self, newr, linew):
 		oldr = self._crossHairH.line().dx() / 2
