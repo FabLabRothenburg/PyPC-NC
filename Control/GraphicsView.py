@@ -21,6 +21,7 @@ class ControlGraphicsView(QtGui.QDialog):
 	def markOrigin(self):
 		(x, y) = self._scene.getCursorPosition()
 		self._scene.setCrosshairPosition(x, y)
+		self._mainwin.setOriginOffset(x, y)
 
 	@QtCore.Slot()
 	def gotoXY(self):

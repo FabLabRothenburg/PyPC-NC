@@ -5,6 +5,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	_gv = None
 	_parser = None
 	_workpiecePos = [ 5, 5, 5 ]
+	_originOffset = [ 0, 0 ]
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
@@ -132,14 +133,15 @@ class ControlMainWindow(QtGui.QMainWindow):
 				return
 
 		filters = [
+			Filters.OffsetFilter([ -self._originOffset[0], -self._originOffset[1] ]),
 			Filters.OffsetFilter(self._workpiecePos)
 		]
 
 		fc = Filters.FilterChain(filters, CNCCon.CNCConWriter())
 		inter = GCode.GCodeInterpreter(fc)
 		inter.position = [
-			self._machine.machineStatus().x() - self._workpiecePos[0],
-			self._machine.machineStatus().y() - self._workpiecePos[1],
+			self._machine.machineStatus().x() - self._workpiecePos[0] + self._originOffset[0],
+			self._machine.machineStatus().y() - self._workpiecePos[1] + self._originOffset[1],
 			self._machine.machineStatus().z() - self._workpiecePos[2]
 		]
 		inter.invertZ = self._ui.invertZ.isChecked()
@@ -189,6 +191,9 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	def workpiecePos(self):
 		return 
+
+	def setOriginOffset(self, x, y):
+		self._originOffset = (x, y)
 
 	@QtCore.Slot()
 	def gotoWorkpieceXY(self):

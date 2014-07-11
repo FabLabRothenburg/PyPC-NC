@@ -24,7 +24,7 @@ class OffsetFilter:
 		self._offsets = offsets
 
 	def straightMotion(self, pos):
-		for i in xrange(3):
+		for i in xrange(len(self._offsets)):
 			if pos[i] != None:
 				pos[i] += self._offsets[i]
 		return pos
