@@ -80,6 +80,7 @@ class GCodeInterpreter:
 		self.plane = 'XY'
 		self.invertZ = False
 		self.target = target
+		self.cannedCycleWords = { }
 
 	def run(self, parser):
 		currentBlock = -1
@@ -228,6 +229,7 @@ class GCodeInterpreter:
 		pass
 
 	def processG80(self, insn):  # cancel modal motion
+		self.cannedCycleWords = { }
 		pass
 
 	def processG90(self, insn):  # absolute distance mode
@@ -494,7 +496,20 @@ class GCodeInterpreter:
 	def _processCannedCycle(self, insn, peck):
 		move = self._readAxes(insn)
 		oldZ = self.position[2]
-		clearZ = float(self._getAddress('R', insn)) * self.stretch
+
+		if self._getAddress('R', insn):
+			self.cannedCycleWords['R'] = self._getAddress('R', insn)
+		if self.cannedCycleWords['R'] == None:
+			raise ValueError('R not set for canned cycle')
+		clearZ = float(self.cannedCycleWords['R']) * self.stretch
+
+		if move[2]:
+			self.cannedCycleWords['Z'] = move[2]
+		else:
+			if self.cannedCycleWords['Z'] == None:
+				raise ValueError('Z not set for canned cycle')
+			move[2] = self.cannedCycleWords['Z']
+
 
 		if self.invertZ:
 			if move[2] != None: move[2] = -move[2]
