@@ -69,9 +69,8 @@ class GCodeInterpreter:
 	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81', 'G83' ]
 
 	def __init__(self, target):
-		self.offsets = [ 10.000, 10.000, 10.000 ]
 		self.position = [ 0, 0, 0 ]
-		self.incrPosition = [ 10.000, 10.000, 10.000 ]
+		self.incrPosition = [ 0.000, 0.000, 0.000 ]
 		self.stretch = 1.0
 		self.end = False
 		self.absDistanceMode = True
@@ -318,7 +317,7 @@ class GCodeInterpreter:
 			move[2] = -move[2]
 
 		if self.absDistanceMode:
-			target = self._vectorAdd(move, self.offsets)
+			target = move
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
@@ -388,7 +387,7 @@ class GCodeInterpreter:
 		radius = self._getAddress('R', insn)
 
 		if self.absDistanceMode:
-			target = self._vectorAdd(move, self.offsets)
+			target = move
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
@@ -431,8 +430,8 @@ class GCodeInterpreter:
 			j = self._getAddress('J', insn)
 
 			if self.absArcDistanceMode:
-				xc = self.offsets[0] + float(i) * self.stretch
-				yc = self.offsets[1] + float(j) * self.stretch
+				xc = float(i) * self.stretch
+				yc = float(j) * self.stretch
 			else:
 				if i:
 					xc = self.position[0] + float(i) * self.stretch
@@ -520,8 +519,7 @@ class GCodeInterpreter:
 				raise ValueError('Q of G83 must not be zero or negative')
 
 		if self.absDistanceMode:
-			target = self._vectorAdd(move, self.offsets)
-			clearZ += self.offsets[2]
+			target = move
 			Z = target[2]
 		else:
 			target = self.incrPosition

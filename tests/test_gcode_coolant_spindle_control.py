@@ -1,6 +1,5 @@
 import unittest
-from Converters import GCode
-from Converters import CNCCon
+from Converters import GCode, CNCCon, Filters
 
 class TestInterpreterCoolantControl(unittest.TestCase):
 	def test_M7(self):
@@ -196,10 +195,13 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 
 
 	def test_M3_W100_behaviour_G0(self):
-		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([30000, 30000, 10000]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		i = GCode.GCodeInterpreter(fc)
 		i.target.buffer = []
-		i.position = [ 0, 0, 0 ]
-		i.offsets = [ 30, 30, 10 ]
+		i.position = [ -30, -30, -10 ]
 		i.process([ 'G0', 'X0', 'Y0' ])
 		i.process([ 'M3', 'S5000' ])
 		i.process([ 'G0', 'X1' ])
@@ -215,10 +217,13 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M3_W100_behaviour_G1G0G1G0(self):
-		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([30000, 30000, 10000]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		i = GCode.GCodeInterpreter(fc)
 		i.target.buffer = []
-		i.position = [ 0, 0, 0 ]
-		i.offsets = [ 30, 30, 10 ]
+		i.position = [ -30, -30, -10 ]
 		i.process([ 'G1', 'X0', 'Y0' ])
 		i.process([ 'M3', 'S5000' ])
 		i.process([ 'G0', 'X1' ])
@@ -234,10 +239,13 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 		])
 
 	def test_M3_W100_behaviour_G0G1G1G0G1(self):
-		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([30000, 30000, 10000]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		i = GCode.GCodeInterpreter(fc)
 		i.target.buffer = []
-		i.position = [ 0, 0, 0 ]
-		i.offsets = [ 30, 30, 10 ]
+		i.position = [ -30, -30, -10 ]
 		i.process([ 'G0', 'X0', 'Y0' ])
 		i.process([ 'M3', 'S5000' ])
 		i.process([ 'G1', 'X1' ])
@@ -256,10 +264,13 @@ class TestInterpreterSpindleSpeed(unittest.TestCase):
 
 
 	def test_M3_W100_behaviour_G0G1M3G1G0G1(self):
-		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([30000, 30000, 10000]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		i = GCode.GCodeInterpreter(fc)
 		i.target.buffer = []
-		i.position = [ 0, 0, 0 ]
-		i.offsets = [ 30, 30, 10 ]
+		i.position = [ -30, -30, -10 ]
 		i.process([ 'G0', 'X0', 'Y0' ])
 		i.process([ 'M3', 'S5000' ])
 		i.process([ 'G1', 'X1' ])

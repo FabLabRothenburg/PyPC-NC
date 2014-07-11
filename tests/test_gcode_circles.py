@@ -1,13 +1,16 @@
 import math
 import unittest
-from Converters import GCode
-from Converters import CNCCon
+from Converters import GCode, CNCCon, Filters
 
 class TestCirclesCW(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 9.000, 9.000, 0.000 ]
+		self.i.position = [ -1.000, -1.000, -10.000 ]
 
 	def test_basicQuarterCircle(self):
 		self.i.process([ 'G0', 'X10', 'Y15' ])
@@ -192,9 +195,13 @@ class TestAngleCalcCCW(unittest.TestCase):
 
 class TestCirclesCCW(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 10000, 10000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 9.000, 9.000, 0.000 ]
+		self.i.position = [ -1.000, -1.000, -10.000 ]
 
 	def test_basicQuarterCircle(self):
 		self.i.process([ 'G0', 'X-10', 'Y0' ])
@@ -244,10 +251,13 @@ class TestCirclesCCW(unittest.TestCase):
 
 class TestArcDistanceModes(unittest.TestCase):
 	def setUp(self):
-		self.i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		f = []
+		f.append(Filters.OffsetFilter([ 30000, 30000, 10000 ]))
+		fc = Filters.FilterChain(f, CNCCon.CNCConWriter())
+
+		self.i = GCode.GCodeInterpreter(fc)
 		self.i.target.buffer = []
-		self.i.position = [ 9.000, 9.000, 0.000 ]
-		self.i.offsets = [ 30.000, 30.000, 10.000 ]
+		self.i.position = [ -21.000, -21.000, -10.000 ]
 
 	def test_incrementalMode(self):
 		self.i.process([ 'G91.1' ])
