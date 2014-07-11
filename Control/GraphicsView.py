@@ -91,8 +91,14 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		maxDist = None
 		selPos = None
 		for item in items:
-			if not isinstance(item, QtGui.QGraphicsLineItem): continue
-			for point in [ item.line().p1(), item.line().p2() ]:
+			if isinstance(item, QtGui.QGraphicsLineItem):
+				points = [ item.line().p1(), item.line().p2() ]
+			elif isinstance(item, QtGui.QGraphicsEllipseItem):
+				points = [ item.rect().center() ]
+			else:
+				continue
+
+			for point in points:
 				dist = math.sqrt((point.x() - clickPos.x()) ** 2 + (point.y() - clickPos.y()) ** 2)
 
 				if maxDist == None or dist < maxDist:
@@ -189,7 +195,12 @@ class SceneRenderer:
 		newy = self._y if machinePos[1] == None else machinePos[1]
 
 		if not rapid:
-			self._scene.addLine(self._x, -self._y, newx, -newy)
+			print (self._x, -self._y, newx, -newy)
+			if self._x == newx and self._y == newy:
+				pen = QtGui.QPen(QtCore.Qt.GlobalColor.magenta)
+				self._scene.addEllipse(newx - 250, -newy - 250, 500, 500, pen)
+			else:
+				self._scene.addLine(self._x, -self._y, newx, -newy)
 
 		self._x = newx
 		self._y = newy
