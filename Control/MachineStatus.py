@@ -1,87 +1,16 @@
 from PySide import QtGui, QtCore
-from Converters import GCode
-from Converters import CNCCon
+from Converters import GCode, CNCCon, Filters
 
-class ControlMachineStatus(QtCore.QObject):
-	status = None
-	pX = None
-	pY = None
-	pZ = None
-	pU = None
-	wpX = 1000
-	wpY = 1000
-	wpZ = 0
-	totalSteps = 0
-	N = 0
-	movingX = False
-	movingY = False
-	movingZ = False
-	movingU = False
-	_preparedManualMove = False
-	_programmedMotionBuffer = None
-	_programmedMotionActive = False
-	_feedRateOverride = 100
-
-	statusUpdated = QtCore.Signal()
+class MachineController(QtCore.QObject):
+	_action = None
 
 	def __init__(self, chatBackend):
 		QtCore.QObject.__init__(self)
 		self._chatBackend = chatBackend
+		self._machineStatus = MachineStatusController(self)
 
-                self._timer = QtCore.QTimer(self)
-                self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
-                self._timer.start(1000)
-
-	def setFeedRateOverride(self, i):
-		self._feedRateOverride = i
-		self._chatBackend.send("@O%d" % self._feedRateOverride)
-
-        @QtCore.Slot()
-	def updateStatus(self):
-		self.cts()
-		self._chatBackend.send("@X")
-		res = self._chatBackend.getline()
-
-		if res[0:2] != "@X":
-			raise ValueError("Unexpected reply to @X command: " + res)
-		self.status = int(res[2:], 16)
-
-		if self.pX == None or self.movingX:
-			self.pX = self.fetchMachinePos("PX")
-		if self.pY == None or self.movingY:
-			self.pY = self.fetchMachinePos("PY")
-		if self.pZ == None or self.movingZ:
-			self.pZ = self.fetchMachinePos("PZ")
-		if self.pU == None or self.movingU:
-			self.pU = self.fetchMachinePos("PU")
-
-		if self._programmedMotionActive:
-			self.N = self.fetchMachinePos('N')
-
-		self.statusUpdated.emit()
-
-		if (self.status & 0x10) == 0:
-			self.movingX = False
-			self.movingY = False
-			self.movingZ = False
-			self.movingU = False
-
-			if self._programmedMotionActive:
-				self.endProgrammedMotion()
-                else:
-			if self._programmedMotionActive:
-				self.runProgrammedMotion()
-
-	def fetchMachinePos(self, direction):
-		self.cts()
-		self._chatBackend.send("@" + direction)
-		res = self._chatBackend.getline()
-
-		i = len(direction) + 1
-
-		if res[0:i] != "@" + direction.upper():
-			raise ValueError("Unexpected reply to @" + direction + " command: " + res)
-		return float(res[i:])
+	def machineStatus(self):
+		return self._machineStatus
 
 	def cts(self):
 		while self._chatBackend.hasLines():
@@ -93,12 +22,84 @@ class ControlMachineStatus(QtCore.QObject):
 			else:
 				print "not processed reply: %s" % msg
 
+	def send(self, sendStr, expectStr = None):
+		self._chatBackend.send(sendStr, expectStr)
+
+	def sendList(self, commands):
+		for command in commands:
+			self.cts()
+			self.send(command, '')
+
+	def sendAndRead(self, sendStr):
+		self.cts()
+		self.send(sendStr)
+		return self._chatBackend.getline()
+
         @QtCore.Slot()
         def stop(self):
-                self._chatBackend.send('@B')
+                self.send('@B')
 
-	@QtCore.Slot()
-	def refMovement(self):
+	def action(self):
+		return self._action
+
+	def setAction(self, action):
+		self._action = action
+
+
+class MachineStatusController(QtCore.QObject):
+	statusUpdated = QtCore.Signal()
+
+	_status = None
+	_axes = [ 'X', 'Y', 'Z', 'U' ]
+	_pos = [ None, None, None, None ]
+	_moving = [ False, False, False, False ]
+
+	def __init__(self, machine):
+		QtCore.QObject.__init__(self)
+		self._machine = machine
+                self._timer = QtCore.QTimer(self)
+                self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
+                self._timer.start(1000)
+
+	def setAxisMoving(self, axis, value = True):
+		self._moving[self._axes.index(axis)] = value
+
+	def setXYZMoving(self, value = True):
+		self._moving = [ value, value, value, self._moving[3] ]
+
+	def setAllMoving(self, value = True):
+		self._moving = [ value, value, value, value ]
+
+        @QtCore.Slot()
+	def updateStatus(self):
+		res = self._machine.sendAndRead('@X')
+		if res[0:2] != "@X": raise ValueError("Unexpected reply to @X command: " + res)
+		self._status = int(res[2:], 16)
+
+		for i in xrange(4):
+			axis = self._axes[i]
+			if self._pos[i] == None or self._moving[i]:
+				res = self._machine.sendAndRead('@P' + axis)
+				if res[0:3] != "@P" + axis:
+					raise ValueError("Unexpected reply to @P" + axis + " command: " + res)
+				self._pos[i] = float(res[3:])
+
+		self.statusUpdated.emit()
+
+		if not (self._status & 0x10):
+			self.setAllMoving(False)
+
+	def status(self): return self._status
+	def x(self): return self._pos[0]
+	def y(self): return self._pos[1]
+	def z(self): return self._pos[2]
+	def u(self): return self._pos[3]
+
+
+
+class ReferenceMotionController(QtCore.QObject):
+	def __init__(self, machine):
+		QtCore.QObject.__init__(self)
 		commands = [
 			'@M0',
 			'#DX,0,90,94,90',
@@ -121,58 +122,14 @@ class ControlMachineStatus(QtCore.QObject):
 			'@D08',
 			'$HZXY',
 		]
-		for command in commands:
-			self.cts()
-			self._chatBackend.send(command, '')
-		self.movingX = True
-		self.movingY = True
-		self.movingZ = True
+		self._machine = machine
+		self._machine.sendList(commands)
+		self._machine.machineStatus().setXYZMoving()
 
-	@QtCore.Slot()
-	def storeXY(self):
-		self.wpX = self.pX
-		self.wpY = self.pY
 
-	@QtCore.Slot()
-	def storeXYZ(self):
-		self.wpX = self.pX
-		self.wpY = self.pY
-		self.wpZ = self.pZ
-
-	@QtCore.Slot()
-	def storeX(self):
-		self.wpX = self.pX
-
-	@QtCore.Slot()
-	def storeY(self):
-		self.wpY = self.pY
-
-	@QtCore.Slot()
-	def storeZ(self):
-		self.wpZ = self.pZ
-
-	def gotoWorkpiece(self, fast, x, y, z):
-		if not self._preparedManualMove:
-			self.prepareManualMove()
-
-		steps = []
-		if x and self.wpX != self.pX:
-			steps.append('x%d' % (self.wpX - self.pX))
-			self.movingX = True
-		if y and self.wpY != self.pY:
-			steps.append('y%d' % (self.wpY - self.pY))
-			self.movingY = True
-		if z and self.wpZ != self.pZ:
-			steps.append('z%d' % (self.wpZ - self.pZ))
-			self.movingZ = True
-
-		if not steps:
-			return
-
-		self.cts()
-		self._chatBackend.send('$E80,' + ','.join(steps))
-
-	def prepareManualMove(self):
+class ManualMotionController(QtCore.QObject):
+	def __init__(self, machine):
+		QtCore.QObject.__init__(self)
 		commands = [
 			'@M0',
 			'#G80,15000',
@@ -184,60 +141,66 @@ class ControlMachineStatus(QtCore.QObject):
 			'#G86,2000',
 			'#G87,1000',
 			'@M1',
-			'@O%d' % self._feedRateOverride,
 		]
-		for command in commands:
-			self.cts()
-			self._chatBackend.send(command, '')
-		self._preparedManualMove = True
+		self._machine = machine
+		self._machine.sendList(commands)
 
 	def singleStep(self, axis, positive, fast):
-		if not self._preparedManualMove:
-			self.prepareManualMove()
-
 		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
 		speed = axisToSpeed[axis];
 		if not fast: speed += 4
 
 		steps = 1 if positive else -1
-		self.cts()
-		self._chatBackend.send('$L%2d,%s%d' % (speed, axis.lower(), steps), '')
-
-		setattr(self, 'p' + axis, None)
+		self._machine.cts()
+		self._machine.send('$L%2d,%s%d' % (speed, axis.lower(), steps), '')
+		self._machine.machineStatus().setAxisMoving(axis)
 
 	def manualMove(self, axis, positive, distance, fast):
-		if not self._preparedManualMove:
-			self.prepareManualMove()
-
 		axisToSpeed = { 'X': 80, 'Y': 81, 'Z': 82, 'U': 83 }
 		speed = axisToSpeed[axis];
 		if not fast: speed += 4
 
 		steps = distance if positive else -distance
-		self.cts()
-		self._chatBackend.send('$E%2d,%s%d' % (speed, axis.lower(), steps), '')
+		self._machine.cts()
+		self._machine.send('$E%2d,%s%d' % (speed, axis.lower(), steps), '')
+		self._machine.machineStatus().setAxisMoving(axis)
 
-		setattr(self, 'moving' + axis, True)
-
-        def gotoXY(self, x, y):
-		if not self._preparedManualMove:
-			self.prepareManualMove()
-
+	def gotoXYZ(self, x, y, z = None):
 		steps = []
-		if (x + self.wpX) != self.pX:
-			steps.append('x%d' % (self.wpX + x - self.pX))
-			self.movingX = True
-		if (y + self.wpY) != self.pY:
-			steps.append('y%d' % (self.wpY + y - self.pY))
-			self.movingY = True
 
-		if not steps:
-			return
+		if x != None:
+			dist = x - self._machine.machineStatus().x()
+			if dist:
+				steps.append('x%d' % dist)
+				self._machine.machineStatus().setAxisMoving('X')
 
-		self.cts()
-		self._chatBackend.send('$E80,' + ','.join(steps))
+		if y != None:
+			dist = y - self._machine.machineStatus().y()
+			if dist:
+				steps.append('y%d' % dist)
+				self._machine.machineStatus().setAxisMoving('Y')
 
-	def startProgrammedMotion(self):
+		if z != None:
+			dist = z - self._machine.machineStatus().z()
+			if dist:
+				steps.append('z%d' % dist)
+				self._machine.machineStatus().setAxisMoving('Z')
+
+		if not steps: return
+		self._machine.cts()
+		self._machine.send('$E80,' + ','.join(steps))
+
+
+
+class ProgrammedMotionController(QtCore.QObject):
+	_completedSteps = 0
+	_sentSteps = 0
+	_totalSteps = 0
+	_feedRateOverride = 100
+	_filters = []
+
+	def __init__(self, machine):
+		QtCore.QObject.__init__(self)
 		commands = [
 			'@M0',
 			'#G11,5000',
@@ -259,44 +222,58 @@ class ControlMachineStatus(QtCore.QObject):
 			'@M2',
 			'@O%d' % self._feedRateOverride,
 		]
+		self._machine = machine
+		self._machine.sendList(commands)
 
-		for command in commands:
-			self.cts()
-			self._chatBackend.send(command, '')
+	def completedSteps(self): return self._completedSteps
+	def totalSteps(self): return self._totalSteps
 
-		self.totalSteps = 0
-		self.sentSteps = 0
-		self.N = 0
+	def setFeedRateOverride(self, i):
+		self._feedRateOverride = i
+		self._machine.send("@O%d" % self._feedRateOverride)
 
-		for command in self._programmedMotionBuffer:
-			if command == 'E': self.totalSteps += 1
+        @QtCore.Slot()
+	def updateStatus(self):
+		res = self._machine.sendAndRead('@N')
+		if res[0:2] != '@N':
+			raise ValueError('Unexpected reply to @N command: ' + res)
+		self._completedSteps = float(res[2:])
 
-		self._preparedManualMove = False
-		self._programmedMotionActive = True
-		self.movingX = True
-		self.movingY = True
-		self.movingZ = True
+		if self._machine.machineStatus().status() & 0x10:
+			self._run()
+		else:
+			self._end()
 
-		self.runProgrammedMotion()
+	def importGCode(self, parser, invertZ):
+		fc = Filters.FilterChain(self._filters, CNCCon.CNCConWriter())
+		inter = GCode.GCodeInterpreter(fc)
+		inter.invertZ = invertZ
+		inter.run(parser)
 
-	def runProgrammedMotion(self):
-		if not len(self._programmedMotionBuffer):
-			return
+		self._buffer = inter.target.buffer
+		for command in self._buffer:
+			if command == 'E': self._totalSteps += 1
 
-		if self.N + 250 < self.sentSteps:
+                self._timer = QtCore.QTimer(self)
+                self.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateStatus)
+                self._timer.start(1000)
+
+		self._machine.machineStatus().setXYZMoving()
+		self._run()
+
+	def _run(self):
+		if self._completedSteps + 250 < self._sentSteps:
 			return	# machine still has work to do; don't send yet
 
-		while len(self._programmedMotionBuffer) and self.sentSteps - self.N < 2000:
-			command = self._programmedMotionBuffer.pop(0)
-			if command == 'E': self.sentSteps += 1
+		while len(self._buffer) and self._sentSteps - self._completedSteps < 2000:
+			command = self._buffer.pop(0)
+			if command == 'E': self._sentSteps += 1
 
-			print "sent %d of %d; current N: %d; next command: %s" % (self.sentSteps, self.totalSteps, self.N, command)
+			print "sent %d of %d; current N: %d; next command: %s" % (self._sentSteps, self._totalSteps, self._completedSteps, command)
+			self._machine.cts()
+			self._machine.send(command)
 
-			self.cts()
-			self._chatBackend.send(command)
-
-
-	def endProgrammedMotion(self):
+	def _end(self):
 		commands = [
 			'@@',
 			'@M2',
@@ -315,20 +292,8 @@ class ControlMachineStatus(QtCore.QObject):
 		]
 
 		for command in commands:
-			self.cts()
-			self._chatBackend.send(command)
+			self._machine.cts()
+			self._machine.send(command)
 
-		self._programmedMotionActive = False
-		self.totalSteps = 0
-
-
-	def importGCode(self, parser, invertZ):
-		inter = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
-		inter.offsets = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
-		inter.position = [ self.pX / 1000.0, self.pY / 1000.0, self.pZ / 1000.0 ]
-		inter.incrPosition = [ self.wpX / 1000.0, self.wpY / 1000.0, self.wpZ / 1000.0 ]
-		inter.invertZ = invertZ
-		inter.run(parser)
-
-		self._programmedMotionBuffer = inter.target.buffer
-		self.startProgrammedMotion()
+		self._timer.stop()
+		self._machine.setAction(None)

@@ -4,8 +4,9 @@ from PySide import QtGui, QtCore
 class ControlGraphicsView(QtGui.QDialog):
 	closed = QtCore.Signal()
 
-	def __init__(self, status):
-		self._status = status
+	def __init__(self, mainwin, machine):
+		self._mainwin = mainwin
+		self._machine = machine
 
 		super(ControlGraphicsView, self).__init__(None)
 
@@ -23,9 +24,17 @@ class ControlGraphicsView(QtGui.QDialog):
 
 	@QtCore.Slot()
 	def gotoXY(self):
+		if isinstance(self._machine.action(), ProgrammedMotionController):
+			return
+		elif not isinstance(self._machine.action(), ManualMotionController):
+			self._machine.setAction(ManualMotionController(self._machine))
+
 		pos = self._scene.getCursorPosition()
 		origin = self._scene.getCrosshairPosition()
-		self._status.gotoXY(pos.x() - origin.x(), pos.y() - origin.y())
+		workpiecePos = self._mainwin.workpiecePos()
+
+		self._machine.action().gotoXYZ(pos.x() - origin.x() + workpiecePos[0], pos.y() - origin.y() + workpiecePos[1])
+
 
 	def closeEvent(self, event):
 		self.closed.emit()
@@ -189,3 +198,4 @@ class SceneRenderer:
 
 from ui.GraphicsView import Ui_GraphicsViewWindow
 from Converters import GCode
+from Control.MachineStatus import *

@@ -1,21 +1,22 @@
 from PySide import QtGui, QtCore
 
 class ControlMainWindow(QtGui.QMainWindow):
-	storeButtonUsed = False
+	_storeButtonUsed = False
 	_gv = None
 	_parser = None
+	_workpiecePos = [ 5, 5, 5 ]
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
 
-		self._status = ControlMachineStatus(chatBackend);
-		self._status.statusUpdated.connect(self.statusUpdated)
+		self._machine = MachineController(chatBackend);
+		self._machine.machineStatus().statusUpdated.connect(self.statusUpdated)
 
 		self._ui = Ui_MainWindow()
 		self._ui.setupUi(self)
 
-		self._ui.stop.clicked.connect(self._status.stop)
-		self._ui.refMovement.clicked.connect(self._status.refMovement)
+		self._ui.stop.clicked.connect(self._machine.stop)
+		self._ui.refMovement.clicked.connect(self.refMovement)
 		self._ui.importGCode.clicked.connect(self.importGCode)
 		self._ui.run.clicked.connect(self.run)
 		self._ui.showGraphicsView.clicked.connect(self.showGraphicsView)
@@ -30,11 +31,11 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.storeY.triggered.connect(self.storeY)
 		self._ui.storeZ.triggered.connect(self.storeZ)
 
-		self._ui.gotoXY.triggered.connect(self.gotoXY)
-		self._ui.gotoXYZ.triggered.connect(self.gotoXYZ)
-		self._ui.gotoX.triggered.connect(self.gotoX)
-		self._ui.gotoY.triggered.connect(self.gotoY)
-		self._ui.gotoZ.triggered.connect(self.gotoZ)
+		self._ui.gotoXY.triggered.connect(self.gotoWorkpieceXY)
+		self._ui.gotoXYZ.triggered.connect(self.gotoWorkpieceXYZ)
+		self._ui.gotoX.triggered.connect(self.gotoWorkpieceX)
+		self._ui.gotoY.triggered.connect(self.gotoWorkpieceY)
+		self._ui.gotoZ.triggered.connect(self.gotoWorkpieceZ)
 
 		self._ui.driveXUp.clicked.connect(self.driveXUp)
 		self._ui.driveYUp.clicked.connect(self.driveYUp)
@@ -47,12 +48,17 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		self._ui.feedRateOverride.valueChanged.connect(self.feedRateOverrideChanged)
 
-		self._status.updateStatus()
+		self._machine.machineStatus().updateStatus()
+
+	@QtCore.Slot()
+	def refMovement(self):
+		# @fixme assert machine is not moving
+		self._machine.setAction(ReferenceMotionController(self._machine))
 
 	@QtCore.Slot()
 	def showGraphicsView(self):
 		if self._gv == None:
-			self._gv = ControlGraphicsView(self._status)
+			self._gv = ControlGraphicsView(self, self._machine)
 			self._gv.render(self._parser)
 			self._gv.show()
                         self._gv.closed.connect(self.graphicsViewClosed)
@@ -65,28 +71,28 @@ class ControlMainWindow(QtGui.QMainWindow):
 	@QtCore.Slot()
 	def statusUpdated(self):
 		infos = []
-		if self._status.status & 0x10: infos.append('moving')
-		if self._status.status & 0x04: infos.append("ref'd")
-		if self._status.status & 0x08: infos.append("ref'ing")
+		if self._machine.machineStatus().status() & 0x10: infos.append('moving')
+		if self._machine.machineStatus().status() & 0x04: infos.append("ref'd")
+		if self._machine.machineStatus().status() & 0x08: infos.append("ref'ing")
 
-		status = hex(self._status.status)
+		status = hex(self._machine.machineStatus().status())
 
 		if infos:
 			status += ' (' + ', '.join(infos) + ')'
 
 		self._ui.statusX.setText(status)
-		self._ui.statusPx.setText("%.3f" % (self._status.pX / 1000))
-		self._ui.statusPy.setText("%.3f" % (self._status.pY / 1000))
-		self._ui.statusPz.setText("%.3f" % (self._status.pZ / 1000))
-		self._ui.statusPu.setText("%.3f" % (self._status.pU / 1000))
+		self._ui.statusPx.setText("%.3f" % (self._machine.machineStatus().x() / 1000))
+		self._ui.statusPy.setText("%.3f" % (self._machine.machineStatus().y() / 1000))
+		self._ui.statusPz.setText("%.3f" % (self._machine.machineStatus().z() / 1000))
+		self._ui.statusPu.setText("%.3f" % (self._machine.machineStatus().u() / 1000))
 
-		self._ui.relX.setText("%.3f" % ((self._status.wpX - self._status.pX) / 1000))
-		self._ui.relY.setText("%.3f" % ((self._status.wpY - self._status.pY) / 1000))
-		self._ui.relZ.setText("%.3f" % ((self._status.wpZ - self._status.pZ) / 1000))
+		self._ui.relX.setText("%.3f" % ((self._workpiecePos[0] - self._machine.machineStatus().x()) / 1000))
+		self._ui.relY.setText("%.3f" % ((self._workpiecePos[1] - self._machine.machineStatus().y()) / 1000))
+		self._ui.relZ.setText("%.3f" % ((self._workpiecePos[2] - self._machine.machineStatus().z()) / 1000))
 
-		if self._status.totalSteps:
-			self._ui.progress.setMaximum(self._status.totalSteps)
-			self._ui.progress.setValue(self._status.N)
+		if isinstance(self._machine.action(), ProgrammedMotionController):
+			self._ui.progress.setMaximum(self._machine.action().totalSteps())
+			self._ui.progress.setValue(self._machine.action().completedSteps())
 		else:
 			self._ui.progress.setMaximum(1)
 			self._ui.progress.setValue(0)
@@ -109,7 +115,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def run(self):
-		if not self._status.status & 0x04:
+		if not self._machine.machineStatus().status() & 0x04:
 			reply = QtGui.QMessageBox.question(self, 'G-Code Import',
 				    'Are you sure to import G-Code without reference movement?',
 				    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
@@ -117,7 +123,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 			if reply == QtGui.QMessageBox.No:
 				return
 
-		if not self.storeButtonUsed:
+		if not self._storeButtonUsed:
 			reply = QtGui.QMessageBox.question(self, 'G-Code Import',
 				    'Are you sure to import G-Code without setting workpiece location?',
 				    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
@@ -125,56 +131,74 @@ class ControlMainWindow(QtGui.QMainWindow):
 			if reply == QtGui.QMessageBox.No:
 				return
 
-		self._status.importGCode(self._parser, self._ui.invertZ.isChecked())
+		self._machine.setAction(ProgrammedMotionController(self._machine))
+		self._machine.action().setFeedRateOverride(self._ui.feedRateOverride.value())
+		self._machine.action().importGCode(self._parser, self._ui.invertZ.isChecked())
 
 	@QtCore.Slot(int)
 	def feedRateOverrideChanged(self, value):
-		self._status.setFeedRateOverride(value)
+		if isinstance(self._machine.action(), ProgrammedMotionController):
+			self._machine.action().setFeedRateOverride(self._ui.feedRateOverride.value())
 
 	@QtCore.Slot()
 	def storeXY(self):
-		self.storeButtonUsed = True
-		self._status.storeXY()
+		self.storeX()
+		self.storeY()
 
 	@QtCore.Slot()
 	def storeXYZ(self):
-		self.storeButtonUsed = True
-		self._status.storeXYZ()
+		self.storeXY()
+		self.storeZ()
 
 	@QtCore.Slot()
 	def storeX(self):
-		self.storeButtonUsed = True
-		self._status.storeX()
+		self._storeButtonUsed = True
+		self._workpiecePos[0] = self._machine.machineStatus().x()
 
 	@QtCore.Slot()
 	def storeY(self):
-		self.storeButtonUsed = True
-		self._status.storeY()
+		self._storeButtonUsed = True
+		self._workpiecePos[1] = self._machine.machineStatus().y()
 
 	@QtCore.Slot()
 	def storeZ(self):
-		self.storeButtonUsed = True
-		self._status.storeZ()
+		self._storeButtonUsed = True
+		self._workpiecePos[2] = self._machine.machineStatus().z()
+
+	def gotoWorkpiece(self, x, y, z):
+		if isinstance(self._machine.action(), ProgrammedMotionController):
+			return
+		elif not isinstance(self._machine.action(), ManualMotionController):
+			self._machine.setAction(ManualMotionController(self._machine))
+
+		self._machine.action().gotoXYZ(x, y, z)
+
+	def workpiecePos(self):
+		return 
 
 	@QtCore.Slot()
-	def gotoXY(self):
-		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, False)
+	def gotoWorkpieceXY(self):
+		self.gotoWorkpiece(self._workpiecePos[0], self._workpiecePos[1], None) 
 
 	@QtCore.Slot()
-	def gotoXYZ(self):
-		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, True, True)
+	def gotoWorkpieceXYZ(self):
+		self.gotoWorkpiece(self._workpiecePos[0], self._workpiecePos[1], self._workpiecePos[2]) 
 
 	@QtCore.Slot()
-	def gotoX(self):
-		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), True, False, False)
+	def gotoWorkpieceX(self):
+		self.gotoWorkpiece(self._workpiecePos[0], None, None)
 
 	@QtCore.Slot()
-	def gotoY(self):
-		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), False, True, False)
+	def gotoWorkpieceY(self):
+		self.gotoWorkpiece(None, self._workpiecePos[1], None) 
 
 	@QtCore.Slot()
-	def gotoZ(self):
-		self._status.gotoWorkpiece(self._ui.driveFast.isChecked(), False, False, True)
+	def gotoWorkpieceZ(self):
+		self.gotoWorkpiece(None, None, self._workpiecePos[2]) 
+
+	def workpiecePos(self):
+		return self._workpiecePos
+
 
 	@QtCore.Slot()
 	def driveXUp(self):
@@ -209,22 +233,27 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self.manualMove('U', False)
 
 	def manualMove(self, axis, positive):
+		if isinstance(self._machine.action(), ProgrammedMotionController):
+			return
+		elif not isinstance(self._machine.action(), ManualMotionController):
+			self._machine.setAction(ManualMotionController(self._machine))
+
 		fast = self._ui.driveFast.isChecked()
 
 		if self._ui.drive1Step.isChecked():
-			self._status.singleStep(axis, positive, fast)
+			self._machine.action().singleStep(axis, positive, fast)
 		elif self._ui.drive001mm.isChecked():
-			self._status.manualMove(axis, positive, 10, fast)
+			self._machine.action().manualMove(axis, positive, 10, fast)
 		elif self._ui.drive01mm.isChecked():
-			self._status.manualMove(axis, positive, 100, fast)
+			self._machine.action().manualMove(axis, positive, 100, fast)
 		elif self._ui.drive1mm.isChecked():
-			self._status.manualMove(axis, positive, 1000, fast)
+			self._machine.action().manualMove(axis, positive, 1000, fast)
 		elif self._ui.drive10mm.isChecked():
-			self._status.manualMove(axis, positive, 10000, fast)
+			self._machine.action().manualMove(axis, positive, 10000, fast)
 		elif self._ui.drive100mm.isChecked():
-			self._status.manualMove(axis, positive, 100000, fast)
+			self._machine.action().manualMove(axis, positive, 100000, fast)
 
 from Converters import GCode
-from Control.MachineStatus import ControlMachineStatus
+from Control.MachineStatus import *
 from Control.GraphicsView import ControlGraphicsView
 from ui.MainWindow import Ui_MainWindow
