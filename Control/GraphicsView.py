@@ -15,6 +15,7 @@ class ControlGraphicsView(QtGui.QDialog):
 
 		self._ui.markOrigin.clicked.connect(self.markOrigin)
 		self._ui.gotoXY.clicked.connect(self.gotoXY)
+		self._ui.polarFixXY.clicked.connect(self.polarFixXY)
 		self._ui.closeButton.clicked.connect(self.close)
 
 	@QtCore.Slot()
@@ -32,10 +33,35 @@ class ControlGraphicsView(QtGui.QDialog):
 
 		(posX, posY) = self._scene.getCursorPosition()
 		(orgX, orgY) = self._scene.getCrosshairPosition()
+
+		(posR, posPhi) = self.toPolar(posX - orgX, posY - orgY)
+		(r, deltaPhi) = self._mainwin.polarCorrection()
+		(posX, posY) = self.fromPolar(posR * r, posPhi + deltaPhi)
+
 		workpiecePos = self._mainwin.workpiecePos()
+		self._machine.action().gotoXYZ(posX + workpiecePos[0], posY + workpiecePos[1])
 
-		self._machine.action().gotoXYZ(posX - orgX + workpiecePos[0], posY - orgY + workpiecePos[1])
+	@QtCore.Slot()
+	def polarFixXY(self):
+		(orgX, orgY) = self._scene.getCrosshairPosition()
+		(posX, posY) = self._scene.getCursorPosition()
+		(r1, phi1) = self.toPolar(posX - orgX, posY - orgY)
 
+		workpiecePos = self._mainwin.workpiecePos()
+		posX = self._machine.machineStatus().x() - workpiecePos[0] + orgX
+		posY = self._machine.machineStatus().y() - workpiecePos[1] + orgY
+		(r2, phi2) = self.toPolar(posX - orgX, posY - orgY)
+		self._mainwin.setPolarCorrection(r2 / r1, phi2 - phi1)
+
+	def fromPolar(self, r, phi):
+		x = r * math.cos(phi)
+		y = r * math.sin(phi)
+		return (x, y)
+
+	def toPolar(self, x, y):
+		r = math.sqrt(x ** 2 + y ** 2)
+		phi = cmp(y, 0) * math.acos(x / r)
+		return (r, phi)
 
 	def closeEvent(self, event):
 		self.closed.emit()

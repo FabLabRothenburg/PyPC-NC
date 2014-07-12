@@ -6,6 +6,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	_parser = None
 	_workpiecePos = [ 5, 5, 5 ]
 	_originOffset = [ 0, 0 ]
+	_polarCorrection = [ 1, 0 ]
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
@@ -192,8 +193,17 @@ class ControlMainWindow(QtGui.QMainWindow):
 	def workpiecePos(self):
 		return 
 
+	def originOffset(self):
+		return self._originOffset
+
 	def setOriginOffset(self, x, y):
 		self._originOffset = (x, y)
+
+	def polarCorrection(self):
+		return self._polarCorrection
+
+	def setPolarCorrection(self, r, phi):
+		self._polarCorrection = (r, phi)
 
 	@QtCore.Slot()
 	def gotoWorkpieceXY(self):
