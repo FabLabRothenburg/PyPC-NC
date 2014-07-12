@@ -135,6 +135,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 		filters = [
 			Filters.OffsetFilter([ -self._originOffset[0], -self._originOffset[1] ]),
+			Filters.PolarFixer(self._polarCorrection[0], self._polarCorrection[1]),
 			Filters.OffsetFilter(self._workpiecePos)
 		]
 

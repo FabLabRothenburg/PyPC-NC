@@ -1,3 +1,4 @@
+import math
 
 def fromPolar(r, phi):
 	x = r * math.cos(phi)
