@@ -34,9 +34,9 @@ class ControlGraphicsView(QtGui.QDialog):
 		(posX, posY) = self._scene.getCursorPosition()
 		(orgX, orgY) = self._scene.getCrosshairPosition()
 
-		(posR, posPhi) = self.toPolar(posX - orgX, posY - orgY)
+		(posR, posPhi) = toPolar(posX - orgX, posY - orgY)
 		(r, deltaPhi) = self._mainwin.polarCorrection()
-		(posX, posY) = self.fromPolar(posR * r, posPhi + deltaPhi)
+		(posX, posY) = fromPolar(posR * r, posPhi + deltaPhi)
 
 		workpiecePos = self._mainwin.workpiecePos()
 		self._machine.action().gotoXYZ(posX + workpiecePos[0], posY + workpiecePos[1])
@@ -45,23 +45,13 @@ class ControlGraphicsView(QtGui.QDialog):
 	def polarFixXY(self):
 		(orgX, orgY) = self._scene.getCrosshairPosition()
 		(posX, posY) = self._scene.getCursorPosition()
-		(r1, phi1) = self.toPolar(posX - orgX, posY - orgY)
+		(r1, phi1) = toPolar(posX - orgX, posY - orgY)
 
 		workpiecePos = self._mainwin.workpiecePos()
 		posX = self._machine.machineStatus().x() - workpiecePos[0] + orgX
 		posY = self._machine.machineStatus().y() - workpiecePos[1] + orgY
-		(r2, phi2) = self.toPolar(posX - orgX, posY - orgY)
+		(r2, phi2) = toPolar(posX - orgX, posY - orgY)
 		self._mainwin.setPolarCorrection(r2 / r1, phi2 - phi1)
-
-	def fromPolar(self, r, phi):
-		x = r * math.cos(phi)
-		y = r * math.sin(phi)
-		return (x, y)
-
-	def toPolar(self, x, y):
-		r = math.sqrt(x ** 2 + y ** 2)
-		phi = cmp(y, 0) * math.acos(x / r)
-		return (r, phi)
 
 	def closeEvent(self, event):
 		self.closed.emit()
@@ -221,7 +211,6 @@ class SceneRenderer:
 		newy = self._y if machinePos[1] == None else machinePos[1]
 
 		if not rapid:
-			print (self._x, -self._y, newx, -newy)
 			if self._x == newx and self._y == newy:
 				pen = QtGui.QPen(QtCore.Qt.GlobalColor.magenta)
 				self._scene.addEllipse(newx - 250, -newy - 250, 500, 500, pen)
@@ -237,3 +226,4 @@ class SceneRenderer:
 from ui.GraphicsView import Ui_GraphicsViewWindow
 from Converters import GCode
 from Control.MachineStatus import *
+from util.polar import *
