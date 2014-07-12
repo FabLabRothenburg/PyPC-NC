@@ -7,5 +7,10 @@ def fromPolar(r, phi):
 
 def toPolar(x, y):
 	r = math.sqrt(x ** 2 + y ** 2)
-	phi = cmp(y, 0) * math.acos(x / r)
+
+	if r == 0:
+		phi = 0
+	else:
+		phi = cmp(y, 0) * math.acos(x / r)
+
 	return (r, phi)
