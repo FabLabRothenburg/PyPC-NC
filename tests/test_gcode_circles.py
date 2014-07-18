@@ -54,7 +54,7 @@ class TestCirclesCW(unittest.TestCase):
 
 		self.assertEqual(self.i.target.buffer, [
 			'E', 'V2,X20000,Y25000',
-			'E', 'E', 'C08', 'W10', 'K21,x18794,y6840,p-349044'
+			'E', 'E', 'C08', 'W10', 'K21,x18794,y6840,p-349065'
 		])
 
 	def test_oneMoreStrangeArc(self):
@@ -227,7 +227,7 @@ class TestCirclesCCW(unittest.TestCase):
 
 		self.assertEqual(self.i.target.buffer, [
 			'E', 'V2,X20000,Y25000',
-			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p349045'
+			'E', 'E', 'C08', 'W10', 'K21,x-20000,y0,p349066'
 		])
 
 	def test_basicThreeQuarterCircle(self):

@@ -393,9 +393,6 @@ class GCodeInterpreter:
 		else:
 			target = self._vectorAdd(move, self.incrPosition)
 
-		target[0] = round(target[0], 3)
-		target[1] = round(target[1], 3)
-
 		xa = self.position[0]
 		ya = self.position[1]
 		xb = target[0]
