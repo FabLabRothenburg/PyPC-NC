@@ -69,6 +69,24 @@ N100 G00 X0 Y0 Z0 (Rapid to Part Zero)
 			'N100 G00 X0 Y0 Z0',
 		])
 
+	def test_normalizeLeadingZeros(self):
+		parser = GCode.GCodeParser()
+		parser.lines = [
+			'G00',
+			'G01',
+			'G03',
+			'G2',
+			'M06',
+		]
+		parser.normalizeLeadingZeros()
+		self.assertEqual(parser.lines, [
+			'G0',
+			'G1',
+			'G3',
+			'G2',
+			'M6',
+		])
+
 	def test_readSequenceNumbers(self):
 		parser = GCode.GCodeParser()
 		parser.lines = [

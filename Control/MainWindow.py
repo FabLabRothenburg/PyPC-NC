@@ -111,6 +111,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 		parser.removeInlineComments()
 		parser.removeBlockSkipLines()
 		parser.normalizeAddressWhitespace()
+		parser.normalizeLeadingZeros()
 		parser.readSequenceNumbers()
 
 		self._parser = parser

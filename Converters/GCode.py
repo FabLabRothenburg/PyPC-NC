@@ -56,6 +56,11 @@ class GCodeParser:
 			return re.sub(r'\b([A-Z])\s*([0-9.-]+)\b', '\\1\\2', x)
 		self.lines = map(f, self.lines)
 
+	def normalizeLeadingZeros(self):
+		def f(x):
+			return re.sub(r'\b([A-Z])0+([0-9])', '\\1\\2', x)
+		self.lines = map(f, self.lines)
+
 	def readSequenceNumbers(self):
 		for i in xrange(0, len(self.lines)):
 			m = re.match(r'\s*N(\d+)\s*', self.lines[i])

@@ -15,6 +15,7 @@ def main():
 		parser.removeInlineComments()
 		parser.removeBlockSkipLines()
 		parser.normalizeAddressWhitespace()
+		parser.normalizeLeadingZeros()
 		parser.readSequenceNumbers()
 
 		inter = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
