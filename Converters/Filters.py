@@ -1,3 +1,5 @@
+import math
+
 class FilterChain:
 	def __init__(self, filters, writer):
 		self.__dict__['_filters'] = filters
@@ -43,7 +45,18 @@ class PolarFixer:
 		return [ posX, posY, pos[2] ]
 
 	def circleMotion(self, x, y, p):
-		raise NotImplementedError('circleMotion not supported by PolarFixer (yet)')
+		if self._r != 1 or self._phi != 0:
+			raise NotImplementedError('circleMotion not supported by PolarFixer (yet)')
+
+		# x and y is the relative position of the circle center relative to _lastPos.
+		(radius, phi) = toPolar(-x, -y)
+		phi += p / 1000000
+		(nx, ny) = fromPolar(radius, phi)
+		nx += self._lastPos[0] + x
+		ny += self._lastPos[1] + y
+
+		self._lastPos = [ nx, ny ]
+		return (x, y, p)
 
 class OffsetFilter:
 	def __init__(self, offsets):
