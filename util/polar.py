@@ -10,6 +10,8 @@ def toPolar(x, y):
 
 	if r == 0:
 		phi = 0
+	elif y == 0:
+		phi = 0 if x > 0 else math.pi
 	else:
 		phi = cmp(y, 0) * math.acos(x / r)
 
