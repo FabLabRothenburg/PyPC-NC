@@ -45,17 +45,26 @@ class PolarFixer:
 		return [ posX, posY, pos[2] ]
 
 	def circleMotion(self, x, y, p):
-		if self._r != 1 or self._phi != 0:
-			raise NotImplementedError('circleMotion not supported by PolarFixer (yet)')
-
 		# x and y is the relative position of the circle center relative to _lastPos.
+		centerX = self._lastPos[0] + x
+		centerY = self._lastPos[1] + y
+
 		(radius, phi) = toPolar(-x, -y)
 		phi += p / 1000000
-		(nx, ny) = fromPolar(radius, phi)
-		nx += self._lastPos[0] + x
-		ny += self._lastPos[1] + y
+		(newX, newY) = fromPolar(radius, phi)
+		newX += centerX
+		newY += centerY
 
-		self._lastPos = [ nx, ny ]
+		(r, phi) = toPolar(self._lastPos[0], self._lastPos[1])
+		(fixedStartX, fixedStartY) = fromPolar(r * self._r, phi + self._phi)
+
+		(r, phi) = toPolar(centerX, centerY)
+		(fixedCenterX, fixedCenterY) = fromPolar(r * self._r, phi + self._phi)
+
+		x = fixedCenterX - fixedStartX
+		y = fixedCenterY - fixedStartY
+
+		self._lastPos = [ newX, newY ]
 		return (x, y, p)
 
 class OffsetFilter:
