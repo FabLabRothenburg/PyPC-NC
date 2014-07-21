@@ -187,7 +187,14 @@ class MyGraphicsView(QtGui.QGraphicsView):
 		lw = 3 * bbox.width() / self.rect().width()
 		self.scene().setCrosshairSize(r, lw)
 
+class MyGraphicsArcItem(QtGui.QGraphicsEllipseItem):
+	def __init__(self, x, y, w, h, parent = None):
+		super(MyGraphicsArcItem, self).__init__(x, y, w, h, parent)
 
+	def paint(self, painter, option, widget):
+		painter.setPen(self.pen())
+		painter.setBrush(self.brush())
+		painter.drawArc(self.rect(), self.startAngle(), self.spanAngle())
 
 class SceneRenderer:
 	axes = [ 'X', 'Y', 'Z' ]
@@ -221,7 +228,25 @@ class SceneRenderer:
 		self._y = newy
 
 	def circleMotion(self, x, y, p):
-		pass # @fixme
+		# x and y is the relative position of the circle center relative to _lastPos.
+		centerX = self._x + x
+		centerY = self._y + y
+
+		(radius, phi) = toPolar(-x, -y)
+		(newX, newY) = fromPolar(radius, phi + p / 1000000)
+		self._x = newX + centerX
+		self._y = newY + centerY
+
+		phi = (phi + math.pi * 2) % (math.pi * 2)
+		# phi = 0 -> right; ccw up to math.pi * 2
+		# p is radiansE6
+
+		e = MyGraphicsArcItem(centerX - radius, -centerY - radius, 2 * radius, 2 * radius)
+		e.setSpanAngle(p * 360 * 16 / math.pi / 2 / 1000000)
+		e.setStartAngle(phi * 360 * 16 / math.pi / 2)
+
+		self._scene.addItem(e)
+
 
 from ui.GraphicsView import Ui_GraphicsViewWindow
 from Converters import GCode
