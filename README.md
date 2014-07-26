@@ -16,6 +16,8 @@ Features
  * automatic reference movement + manual movements
  * storing workpiece location (and moving back to its' origin)
  * G-Code import & interpreter
+ * graphical rendering of G-Code on XY plane (bird's eye view)
+ * polar coordinate based position correction
  * CNCCON mock implementation
 
 
@@ -38,7 +40,7 @@ Especially the interpreter (currently) lacks support for
  * spindle speed override during program execution (serial command `C`)
  * conditional blocks, loop constructs and expression evaluation
 
-Besides block execution is strictly from left to right.  Other G-Code interpreters
+Besides block execution is mostly from left to right.  Other G-Code interpreters
 [don't necessarily execute left to right](http://www.cnccookbook.com/CCCNCGCodeBlocks.htm).
 
 
