@@ -426,6 +426,8 @@ class MockMachine:
 
 		# @O100 (feed rate override)
 		if command[0:2] == '@O':
+			if len(command) == 2: # @fixme get call ??
+				return ''
 			val = int(command[2:])
 			if val < 10 or val > 200:
 				return '*031'  # out of range
