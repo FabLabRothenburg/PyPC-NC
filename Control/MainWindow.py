@@ -59,6 +59,12 @@ class ControlMainWindow(QtGui.QMainWindow):
 
 	@QtCore.Slot()
 	def showGraphicsView(self):
+		if self._parser == None:
+			QtGui.QMessageBox.information(
+				self, 'PyPC-NC Graphics View',
+				'You need to import G-Code before visualizing it.')
+			return
+
 		if self._gv == None:
 			self._gv = ControlGraphicsView(self, self._machine)
 			self._gv.render(self._parser)
