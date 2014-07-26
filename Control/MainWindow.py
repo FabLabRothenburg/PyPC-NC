@@ -103,6 +103,8 @@ class ControlMainWindow(QtGui.QMainWindow):
 		if isinstance(self._machine.action(), ProgrammedMotionController):
 			self._ui.progress.setMaximum(self._machine.action().totalSteps())
 			self._ui.progress.setValue(self._machine.action().completedSteps())
+		elif self._inter and self._inter.pause:
+			self._ui.progress.setMaximum(0)
 		else:
 			self._ui.progress.setMaximum(1)
 			self._ui.progress.setValue(0)
