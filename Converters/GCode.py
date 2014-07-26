@@ -122,8 +122,6 @@ class GCodeInterpreter:
 				axes.append(i)
 			elif cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
 				cur.append(i)
-			elif cur and cur[0] in [ 'M6' ] and i[0] == 'T':
-				cur.append(i)
 			elif i[0] in [ 'G', 'M', 'F', 'S', 'T' ]:
 				if cur: instructions.append(cur)
 				if i in self.axesCommands:
