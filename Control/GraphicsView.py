@@ -109,8 +109,8 @@ class MyGraphicsScene(QtGui.QGraphicsScene):
 		for item in items:
 			if isinstance(item, QtGui.QGraphicsLineItem):
 				points = [ item.line().p1(), item.line().p2() ]
-			elif isinstance(item, QtGui.QGraphicsEllipseItem):
-				points = [ item.rect().center() ]
+			elif isinstance(item, ClickableEllipseItem):
+				points = item.points()
 			else:
 				continue
 
@@ -187,7 +187,16 @@ class MyGraphicsView(QtGui.QGraphicsView):
 		lw = 3 * bbox.width() / self.rect().width()
 		self.scene().setCrosshairSize(r, lw)
 
-class MyGraphicsArcItem(QtGui.QGraphicsEllipseItem):
+class ClickableEllipseItem(QtGui.QGraphicsEllipseItem):
+	_points = []
+
+	def addPoint(self, point):
+		self._points.append(point)
+
+	def points(self):
+		return self._points
+
+class MyGraphicsArcItem(ClickableEllipseItem):
 	def __init__(self, x, y, w, h, parent = None):
 		super(MyGraphicsArcItem, self).__init__(x, y, w, h, parent)
 
@@ -219,8 +228,10 @@ class SceneRenderer:
 
 		if not rapid:
 			if self._x == newx and self._y == newy:
-				pen = QtGui.QPen(QtCore.Qt.GlobalColor.magenta)
-				self._scene.addEllipse(newx - 250, -newy - 250, 500, 500, pen)
+				e = ClickableEllipseItem(newx - 250, -newy - 250, 500, 500)
+				e.setPen(QtGui.QPen(QtCore.Qt.GlobalColor.magenta))
+				e.addPoint(QtCore.QPointF(newx, -newy))
+				self._scene.addItem(e)
 			else:
 				self._scene.addLine(self._x, -self._y, newx, -newy)
 
@@ -234,8 +245,6 @@ class SceneRenderer:
 
 		(radius, phi) = toPolar(-x, -y)
 		(newX, newY) = fromPolar(radius, phi + p / 1000000)
-		self._x = newX + centerX
-		self._y = newY + centerY
 
 		phi = (phi + math.pi * 2) % (math.pi * 2)
 		# phi = 0 -> right; ccw up to math.pi * 2
@@ -244,6 +253,11 @@ class SceneRenderer:
 		e = MyGraphicsArcItem(centerX - radius, -centerY - radius, 2 * radius, 2 * radius)
 		e.setSpanAngle(p * 360 * 16 / math.pi / 2 / 1000000)
 		e.setStartAngle(phi * 360 * 16 / math.pi / 2)
+		e.addPoint(QtCore.QPointF(self._x, -self._y))
+		e.addPoint(QtCore.QPointF(newX + centerX, -(newY + centerY)))
+
+		self._x = newX + centerX
+		self._y = newY + centerY
 
 		self._scene.addItem(e)
 
