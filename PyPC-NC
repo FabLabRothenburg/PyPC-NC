@@ -11,6 +11,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Python GUI tool to drive a CNC controller')
 	parser.add_argument('--mock', '-m', action='store_true', help='use mock backend, instead of serial')
 	parser.add_argument('--device', '-D', default='/dev/ttyS0', help='set device name')
+	parser.add_argument('--file', '-f', help='file to automatically open on start')
 
 	args = parser.parse_args()
 	log = Chat.ChatLog()
@@ -28,5 +29,9 @@ if __name__ == "__main__":
 
 	mainwin = ControlMainWindow(cb)
 	mainwin.show()
+
+	if args.file:
+		mainwin.importGCodeFromFile(args.file)
+
 	sys.exit(app.exec_())
 

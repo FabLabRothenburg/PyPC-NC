@@ -103,9 +103,11 @@ class ControlMainWindow(QtGui.QMainWindow):
 	def importGCode(self):
 		filename = QtGui.QFileDialog.getOpenFileName(self, 'Import G-Code', '.')
 		if filename[0] == '': return
+		self.importGCodeFromFile(filename[0])
 
+	def importGCodeFromFile(self, filename):
 		parser = GCode.GCodeParser()
-		parser.readFile(filename[0])
+		parser.readFile(filename)
 		parser.removeTapeMarkers()
 		parser.removeComments()
 		parser.removeInlineComments()
