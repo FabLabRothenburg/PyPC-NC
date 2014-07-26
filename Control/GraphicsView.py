@@ -61,14 +61,7 @@ class ControlGraphicsView(QtGui.QDialog):
 		self._scene = MyGraphicsScene()
 
 		renderer = SceneRenderer(self._scene)
-		inter = GCode.GCodeInterpreter(renderer)
-		inter.offsets = [ 0, 0, 0 ]
-		inter.position = [ 0, 0, 0 ]
-		inter.incrPosition = [ 0, 0, 0 ]
-		inter.run(parser)
-
-		while not inter.end:
-			inter.resume(parser)
+		renderer.render(parser)
 
 		self._ui.graphicsView.setScene(self._scene)
 
@@ -226,6 +219,31 @@ class SceneRenderer:
 	def setSpindleConfig(self, spindleCCW, spindleEnable, speed): pass
 	def setSpeed(self, rapid): pass
 
+	def render(self, parser):
+		self._inter = GCode.GCodeInterpreter(self)
+		self._inter.offsets = [ 0, 0, 0 ]
+		self._inter.position = [ 0, 0, 0 ]
+		self._inter.incrPosition = [ 0, 0, 0 ]
+		self._inter.run(parser)
+
+		while not self._inter.end:
+			self._inter.resume(parser)
+
+	def currentToolPen(self):
+		tool = self._inter.currentTool
+
+		if tool == 2: color = QtCore.Qt.GlobalColor.blue
+		elif tool == 3: color = QtCore.Qt.GlobalColor.cyan
+		elif tool == 4: color = QtCore.Qt.GlobalColor.green
+		elif tool == 5: color = QtCore.Qt.GlobalColor.magenta
+		elif tool == 6: color = QtCore.Qt.GlobalColor.red
+		elif tool == 7: color = QtCore.Qt.GlobalColor.yellow
+		elif tool == 8: color = QtCore.Qt.GlobalColor.lightGray
+		elif tool == 9: color = QtCore.Qt.GlobalColor.darkYellow
+		else: color = QtCore.Qt.GlobalColor.black
+
+		return QtGui.QPen(color)
+
 	def straightMotion(self, rapid, longMoveAxe, machinePos):
 		newx = self._x if machinePos[0] == None else machinePos[0]
 		newy = self._y if machinePos[1] == None else machinePos[1]
@@ -237,7 +255,7 @@ class SceneRenderer:
 				e.addPoint(QtCore.QPointF(newx, -newy))
 				self._scene.addItem(e)
 			else:
-				self._scene.addLine(self._x, -self._y, newx, -newy)
+				self._scene.addLine(self._x, -self._y, newx, -newy, self.currentToolPen())
 
 		self._x = newx
 		self._y = newy
@@ -257,6 +275,7 @@ class SceneRenderer:
 		e = ClickableArcItem(centerX - radius, -centerY - radius, 2 * radius, 2 * radius)
 		e.setSpanAngle(p * 360 * 16 / math.pi / 2 / 1000000)
 		e.setStartAngle(phi * 360 * 16 / math.pi / 2)
+		e.setPen(self.currentToolPen())
 		e.addPoint(QtCore.QPointF(self._x, -self._y))
 		e.addPoint(QtCore.QPointF(newX + centerX, -(newY + centerY)))
 

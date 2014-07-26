@@ -98,6 +98,9 @@ class GCodeInterpreter:
 		self.pause = False
 		self.target.appendPreamble()
 
+		# assume tool change was performed during pause
+		self.currentTool = self.nextTool
+
 		while not self.end and not self.pause:
 			self.currentBlock += 1
 
