@@ -196,9 +196,9 @@ class ClickableEllipseItem(QtGui.QGraphicsEllipseItem):
 	def points(self):
 		return self._points
 
-class MyGraphicsArcItem(ClickableEllipseItem):
+class ClickableArcItem(ClickableEllipseItem):
 	def __init__(self, x, y, w, h, parent = None):
-		super(MyGraphicsArcItem, self).__init__(x, y, w, h, parent)
+		super(ClickableArcItem, self).__init__(x, y, w, h, parent)
 
 	def paint(self, painter, option, widget):
 		painter.setPen(self.pen())
@@ -250,7 +250,7 @@ class SceneRenderer:
 		# phi = 0 -> right; ccw up to math.pi * 2
 		# p is radiansE6
 
-		e = MyGraphicsArcItem(centerX - radius, -centerY - radius, 2 * radius, 2 * radius)
+		e = ClickableArcItem(centerX - radius, -centerY - radius, 2 * radius, 2 * radius)
 		e.setSpanAngle(p * 360 * 16 / math.pi / 2 / 1000000)
 		e.setStartAngle(phi * 360 * 16 / math.pi / 2)
 		e.addPoint(QtCore.QPointF(self._x, -self._y))
