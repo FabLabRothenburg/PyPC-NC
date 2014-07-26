@@ -11,6 +11,9 @@ class FilterChain:
 	def __setattr__(self, name, value):
 		setattr(self.__dict__['_writer'], name, value)
 
+	def filters(self):
+		return self.__dict__['_filters']
+
 	def straightMotion(self, rapid, longMoveAxe, pos):
 		for filter in self.__dict__['_filters']:
 			pos = filter.straightMotion(pos)
@@ -69,6 +72,9 @@ class PolarFixer:
 
 class OffsetFilter:
 	def __init__(self, offsets):
+		self._offsets = offsets
+
+	def setOffsets(self, offsets):
 		self._offsets = offsets
 
 	def straightMotion(self, pos):

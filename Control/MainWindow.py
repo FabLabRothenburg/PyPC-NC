@@ -104,6 +104,11 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self._ui.progress.setMaximum(self._machine.action().totalSteps())
 			self._ui.progress.setValue(self._machine.action().completedSteps())
 		elif self._inter and self._inter.pause:
+			if self._ui.progress.maximum():
+				QtGui.QMessageBox.information(
+					self, 'Tool Change',
+					'Insert tool %d now.' % self._inter.nextTool)
+
 			self._ui.progress.setMaximum(0)
 		else:
 			self._ui.progress.setMaximum(1)
@@ -181,6 +186,12 @@ class ControlMainWindow(QtGui.QMainWindow):
 			return
 
 		self._inter.target.buffer = [ ]
+		self._inter.position = [
+			self._machine.machineStatus().x() - self._workpiecePos[0] + self._originOffset[0],
+			self._machine.machineStatus().y() - self._workpiecePos[1] + self._originOffset[1],
+			self._machine.machineStatus().z() - self._workpiecePos[2]
+		]
+		self._inter.target.filters()[2].setOffsets(self._workpiecePos)
 		self._inter.resume(self._parser)
 
 		self._machine.setAction(ProgrammedMotionController(self._machine))

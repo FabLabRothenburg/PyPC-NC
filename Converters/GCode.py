@@ -76,6 +76,7 @@ class GCodeInterpreter:
 	def __init__(self, target):
 		self.position = [ 0, 0, 0 ]
 		self.incrPosition = [ 0.000, 0.000, 0.000 ]
+		self.pausePosition = None
 		self.stretch = 1.0
 		self.end = False
 		self.pause = False
@@ -101,6 +102,11 @@ class GCodeInterpreter:
 		# assume tool change was performed during pause
 		self.currentTool = self.nextTool
 
+		# restore pause position
+		if self.pausePosition:
+			self._straightMotionToTarget([ self.pausePosition[0], self.pausePosition[1], None ], True)
+			self._straightMotionToTarget([ None, None, self.pausePosition[2] ], True)
+
 		while not self.end and not self.pause:
 			self.currentBlock += 1
 
@@ -119,6 +125,7 @@ class GCodeInterpreter:
 				self.process(command)
 
 		self.target.appendPostamble()
+		self.pausePosition = list(self.position)
 
 	def splitBlock(self, blockStr):
 		instructions = []
