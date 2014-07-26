@@ -99,10 +99,10 @@ class GCodeInterpreter:
 		self.target.appendPreamble()
 
 		while not self.end and not self.pause:
-			currentBlock += 1
+			self.currentBlock += 1
 
-			if currentBlock < len(parser.lines):
-				blockStr = parser.lines[currentBlock]
+			if self.currentBlock < len(parser.lines):
+				blockStr = parser.lines[self.currentBlock]
 			else:
 				blockStr = 'M30'
 
