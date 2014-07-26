@@ -92,7 +92,11 @@ class GCodeInterpreter:
 
 		while not self.end:
 			currentBlock += 1
-			blockStr = parser.lines[currentBlock]
+
+			if currentBlock < len(parser.lines):
+				blockStr = parser.lines[currentBlock]
+			else:
+				blockStr = 'M30'
 
 			if self.readParameters(blockStr):
 				continue
