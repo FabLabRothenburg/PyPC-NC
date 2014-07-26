@@ -67,6 +67,9 @@ class ControlGraphicsView(QtGui.QDialog):
 		inter.incrPosition = [ 0, 0, 0 ]
 		inter.run(parser)
 
+		while not inter.end:
+			inter.resume(parser)
+
 		self._ui.graphicsView.setScene(self._scene)
 
 		bbox = self._scene.itemsBoundingRect()
@@ -213,6 +216,7 @@ class SceneRenderer:
 	def __init__(self, scene):
 		self._scene = scene
 
+	def appendPreamble(self): pass
 	def appendPostamble(self): pass
 	def setFeedRate(self, fr): pass
 	def setSpindleSpeed(self, speed): pass

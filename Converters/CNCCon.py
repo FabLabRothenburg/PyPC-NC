@@ -2,7 +2,7 @@ class CNCConWriter:
 	axes = [ 'X', 'Y', 'Z' ]
 
 	def __init__(self):
-		self.buffer = [ 'C08', 'D141', 'A50', 'A51', 'D141', 'W100', 'E' ]
+		self.buffer = []
 		self.C = 8
 		self.D = 141
 		self.W = 100
@@ -11,6 +11,15 @@ class CNCConWriter:
 		self.initialW100Stickyness = True
 		self.coolantEnable = False
 		self.firstMove = True
+
+	def appendPreamble(self):
+		self.buffer.append('C08')
+		self.buffer.append('D141')
+		self.buffer.append('A50')
+		self.buffer.append('A51')
+		self.buffer.append('D141')
+		self.buffer.append('W100')
+		self.buffer.append('E')
 
 	def appendPostamble(self):
 		self.buffer.append('E')

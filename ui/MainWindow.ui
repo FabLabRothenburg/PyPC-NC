@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>885</width>
+    <width>889</width>
     <height>414</height>
    </rect>
   </property>
@@ -794,6 +794,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="resume">
+        <property name="text">
+         <string>Continue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="showGraphicsView">
         <property name="text">
          <string>Graphics View ...</string>
@@ -822,7 +829,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>885</width>
+     <width>889</width>
      <height>25</height>
     </rect>
    </property>

@@ -4,6 +4,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	_storeButtonUsed = False
 	_gv = None
 	_parser = None
+	_inter = None
 	_workpiecePos = [ 5, 5, 5 ]
 	_originOffset = [ 0, 0 ]
 	_polarCorrection = [ 1, 0 ]
@@ -21,6 +22,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 		self._ui.refMovement.clicked.connect(self.refMovement)
 		self._ui.importGCode.clicked.connect(self.importGCode)
 		self._ui.run.clicked.connect(self.run)
+		self._ui.resume.clicked.connect(self.resume)
 		self._ui.showGraphicsView.clicked.connect(self.showGraphicsView)
 
 		self._ui.gotoOther.setMenu(self._ui.menuGoto)
@@ -149,18 +151,39 @@ class ControlMainWindow(QtGui.QMainWindow):
 		]
 
 		fc = Filters.FilterChain(filters, CNCCon.CNCConWriter())
-		inter = GCode.GCodeInterpreter(fc)
-		inter.position = [
+		self._inter = GCode.GCodeInterpreter(fc)
+		self._inter.position = [
 			self._machine.machineStatus().x() - self._workpiecePos[0] + self._originOffset[0],
 			self._machine.machineStatus().y() - self._workpiecePos[1] + self._originOffset[1],
 			self._machine.machineStatus().z() - self._workpiecePos[2]
 		]
-		inter.invertZ = self._ui.invertZ.isChecked()
-		inter.run(self._parser)
+		self._inter.invertZ = self._ui.invertZ.isChecked()
+		self._inter.run(self._parser)
 
 		self._machine.setAction(ProgrammedMotionController(self._machine))
 		self._machine.action().setFeedRateOverride(self._ui.feedRateOverride.value())
-		self._machine.action().setCommands(inter.target.buffer)
+		self._machine.action().setCommands(self._inter.target.buffer)
+
+	@QtCore.Slot()
+	def resume(self):
+		if not self._inter:
+			QtGui.QMessageBox.information(
+				self, 'PyPC-NC',
+				'Interpreter not initialized.  You need to open & "Run" first.')
+			return
+
+		if not self._inter.pause:
+			QtGui.QMessageBox.information(
+				self, 'PyPC-NC',
+				'Interpreter not currently paused.  You may want to start over by clicking "Run".')
+			return
+
+		self._inter.target.buffer = [ ]
+		self._inter.resume(self._parser)
+
+		self._machine.setAction(ProgrammedMotionController(self._machine))
+		self._machine.action().setFeedRateOverride(self._ui.feedRateOverride.value())
+		self._machine.action().setCommands(self._inter.target.buffer)
 
 	@QtCore.Slot(int)
 	def feedRateOverrideChanged(self, value):

@@ -78,6 +78,7 @@ class GCodeInterpreter:
 		self.incrPosition = [ 0.000, 0.000, 0.000 ]
 		self.stretch = 1.0
 		self.end = False
+		self.pause = False
 		self.absDistanceMode = True
 		self.absArcDistanceMode = False
 		self.firstMove = True
@@ -86,11 +87,18 @@ class GCodeInterpreter:
 		self.invertZ = False
 		self.target = target
 		self.cannedCycleWords = { }
+		self.currentTool = 1
+		self.nextTool = 1
 
 	def run(self, parser):
-		currentBlock = -1
+		self.currentBlock = -1
+		self.resume(parser)
 
-		while not self.end:
+	def resume(self, parser):
+		self.pause = False
+		self.target.appendPreamble()
+
+		while not self.end and not self.pause:
 			currentBlock += 1
 
 			if currentBlock < len(parser.lines):
@@ -207,7 +215,7 @@ class GCodeInterpreter:
 		self.target.setSpindleSpeed(min(255, round(float(self._getAddress('S', insn)) * .0141)))
 
 	def processT(self, insn):  # select tool
-		pass
+		self.nextTool = int(self._getAddress('T', insn))
 
 	def processG04(self, insn):  # dwell
 		pass
@@ -278,7 +286,7 @@ class GCodeInterpreter:
 		self._setSpindleConfig(insn, None, False)
 
 	def processM6(self, insn):  # tool change (not supported)
-		self.target.appendEmptyStep()
+		self.pause = True
 
 	def processM7(self, insn):  # coolant on "mist"
 		self.target.setCoolantMist()
