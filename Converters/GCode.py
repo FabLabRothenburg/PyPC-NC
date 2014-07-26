@@ -98,7 +98,7 @@ class GCodeInterpreter:
 				continue
 
 			blockStr = self.substituteParameters(blockStr)
-			commands = self.splitBlock(blockStr)
+			commands = self.reorderBlock(self.splitBlock(blockStr))
 
 			for command in commands:
 				self.process(command)
@@ -138,6 +138,14 @@ class GCodeInterpreter:
 				instructions[axesCommandIndex] = instructions[axesCommandIndex] + axes
 
 		return instructions
+
+	def reorderBlock(self, block):
+		def sorter(i):
+			if i[0][0] == 'F':
+				return 10
+			else:
+				return 20
+		return sorted(block, key = sorter)
 
 	def readParameters(self, blockStr):
 		m = re.match(r'\s*#(\d+)\s*=\s*(.*?)\s*$', blockStr)

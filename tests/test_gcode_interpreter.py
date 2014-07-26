@@ -30,6 +30,17 @@ class TestBlockSplitting(unittest.TestCase):
 			[ 'M7' ],
 			[ 'F1' ] ])
 
+class TestBlockSorting(unittest.TestCase):
+	def test_reorderKeepOrder(self):
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		self.assertEqual(i.reorderBlock([[ 'G0' ], [ 'G1' ], [ 'G2' ]]),
+				 [[ 'G0' ], [ 'G1' ], [ 'G2' ]])
+
+	def test_reorderFbeforeG(self):
+		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
+		self.assertEqual(i.reorderBlock([[ 'G0' ], [ 'F200' ]]),
+				 [[ 'F200' ], [ 'G0' ]])
+
 class TestInterpreterBasics(unittest.TestCase):
 	def test_G20(self):
 		i = GCode.GCodeInterpreter(CNCCon.CNCConWriter())
