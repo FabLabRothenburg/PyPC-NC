@@ -22,7 +22,7 @@ class FilterChain:
 		self._writer.circleMotion(x, y, p)
 
 class PolarFixer:
-	_lastPos = [ None, None ]
+	_lastPos = [ 0, 0 ]
 
 	def __init__(self, r, phi):
 		self._r = r
