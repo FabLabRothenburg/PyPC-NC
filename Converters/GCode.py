@@ -140,10 +140,13 @@ class GCodeInterpreter:
 				axes.append(i)
 			elif cur and cur[0] in [ 'M3', 'M4' ] and i[0] == 'S':
 				cur.append(i)
-			elif i[0] in [ 'G', 'M', 'F', 'S', 'T' ]:
+			elif i[0] == 'F':
+				instructions.append([i])
+				if axesCommandIndex != None: axesCommandIndex += 1
+			elif i[0] in [ 'G', 'M', 'S', 'T' ]:
 				if cur: instructions.append(cur)
 				if i in self.axesCommands:
-					axesCommandIndex = len(cur)
+					axesCommandIndex = len(instructions)
 				cur = [i]
 			else:
 				cur.append(i)

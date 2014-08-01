@@ -27,8 +27,8 @@ class TestBlockSplitting(unittest.TestCase):
 			[ 'G90' ],
 			[ 'G64', 'P0.003' ],
 			[ 'M3', 'S3000' ],
-			[ 'M7' ],
-			[ 'F1' ] ])
+			[ 'F1' ],
+			[ 'M7' ] ])
 
 class TestBlockSorting(unittest.TestCase):
 	def test_reorderKeepOrder(self):
