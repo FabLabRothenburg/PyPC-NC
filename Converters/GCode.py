@@ -70,8 +70,8 @@ class GCodeParser:
 			self.sequenceNumbers[int(m.group(1))] = i
 
 class GCodeInterpreter:
-	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G83' ]
-	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81', 'G83' ]
+	motionGroup = [ 'G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G82', 'G83' ]
+	axesCommands = [ 'G0', 'G1', 'G2', 'G3', 'G81', 'G82', 'G83' ]
 
 	def __init__(self, target):
 		self.position = [ 0, 0, 0 ]
@@ -294,6 +294,9 @@ class GCodeInterpreter:
 
 	def processM5(self, insn):  # stop spindle
 		self._setSpindleConfig(insn, None, False)
+
+	def processG4(self, insn):
+		pass
 
 	def processM6(self, insn):  # tool change (not supported)
 		self.pause = True
@@ -606,6 +609,9 @@ class GCodeInterpreter:
 			self._straightMotionToTarget([ None, None, oldZ ], True)
 
 	def processG81(self, insn):
+		self._processCannedCycle(insn, False)
+
+	def processG82(self, insn):
 		self._processCannedCycle(insn, False)
 
 	def processG83(self, insn):
