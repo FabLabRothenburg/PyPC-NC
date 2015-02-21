@@ -60,6 +60,7 @@ class ChatBackendBase:
 			print "ignoring: %s" % msg
 
 	def hasLines(self):
+		self._poll()
 		return bool(self._nextLines)
 
 	def _handleSOH(self):

@@ -40,5 +40,9 @@ if __name__ == "__main__":
 		notifier = QtCore.QSocketNotifier(fd, QtCore.QSocketNotifier.Read)
 		notifier.activated.connect(mainwin.readControlEvent)
 
+	if not args.mock:
+		serial_moni = QtCore.QSocketNotifier(cb.fileno(), QtCore.QSocketNotifier.Read)
+		serial_moni.activated.connect(mainwin.pollStatus)
+
 	sys.exit(app.exec_())
 

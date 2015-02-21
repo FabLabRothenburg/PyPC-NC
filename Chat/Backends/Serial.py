@@ -47,3 +47,6 @@ class ChatBackendSerial(ChatBackendBase):
 
 			self._nextLines.append(self._buffer[:pos])
 			self._buffer = self._buffer[pos + 1:]
+
+	def fileno(self):
+		return self._serial.fileno()

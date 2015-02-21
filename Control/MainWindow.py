@@ -364,6 +364,10 @@ class ControlMainWindow(QtGui.QMainWindow):
 		elif z == 1:
 			self.manualMove('Z', True)
 
+	@QtCore.Slot(int)
+	def pollStatus(self, fd):
+		self._machine.cts()
+
 from Converters import GCode
 from Control.MachineStatus import *
 from Control.GraphicsView import ControlGraphicsView
