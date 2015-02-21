@@ -25,6 +25,9 @@ class MachineController(QtCore.QObject):
 	def send(self, sendStr, expectStr = None):
 		self._chatBackend.send(sendStr, expectStr)
 
+	def sendQueue(self, sendStr):
+		self._chatBackend.sendQueue(sendStr)
+
 	def sendList(self, commands):
 		for command in commands:
 			self.cts()
@@ -151,8 +154,7 @@ class ManualMotionController(QtCore.QObject):
 		if not fast: speed += 4
 
 		steps = 1 if positive else -1
-		self._machine.cts()
-		self._machine.send('$L%2d,%s%d' % (speed, axis.lower(), steps), '')
+		self._machine.sendQueue('$L%2d,%s%d' % (speed, axis.lower(), steps))
 		self._machine.machineStatus().setAxisMoving(axis)
 
 	def manualMove(self, axis, positive, distance, fast):
@@ -161,8 +163,7 @@ class ManualMotionController(QtCore.QObject):
 		if not fast: speed += 4
 
 		steps = distance if positive else -distance
-		self._machine.cts()
-		self._machine.send('$E%2d,%s%d' % (speed, axis.lower(), steps), '')
+		self._machine.sendQueue('$E%2d,%s%d' % (speed, axis.lower(), steps))
 		self._machine.machineStatus().setAxisMoving(axis)
 
 	def gotoXYZ(self, x, y, z = None):

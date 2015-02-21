@@ -34,6 +34,7 @@ class ChatBackendSerial(ChatBackendBase):
 			if self._buffer[0] == '\001':
 				self._nextLines.append('\001')
 				self._buffer = self._buffer[1:]
+				self._handleSOH()
 				continue
 
 			if self._buffer[0] == '\004':

@@ -4,6 +4,8 @@ class ChatBackendBase:
 	"""Common base class for chat backend implementations."""
 	_chatLog = None
 	_sane = True
+	_waitSOH = False
+	_queue = deque()
 	_nextLines = deque()
 
 	def __init__(self, chatLog):
@@ -23,6 +25,13 @@ class ChatBackendBase:
 
 	def isSane(self):
 		return _sane
+
+	def sendQueue(self, sendStr):
+		if self._waitSOH:
+			self._queue.append(sendStr)
+		else:
+			self._waitSOH = True
+			return self.send(sendStr, "");
 
 	def send(self, sendStr, expectStr = None):
 		self._chatLog.append("out", sendStr)
@@ -52,3 +61,13 @@ class ChatBackendBase:
 
 	def hasLines(self):
 		return bool(self._nextLines)
+
+	def _handleSOH(self):
+		print "handling SOH ..."
+
+		if self._queue:
+			print "received SOH, sending queued event ..."
+			self.send(self._queue.popleft(), "")
+		else:
+			print "received SOH, clearing wait flag ..."
+			self._waitSOH = False
