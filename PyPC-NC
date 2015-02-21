@@ -4,7 +4,7 @@ import Chat
 import Chat.Backends
 
 from PySide import QtGui, QtCore
-import sys
+import sys, os, fcntl
 import argparse
 
 if __name__ == "__main__":
@@ -12,6 +12,7 @@ if __name__ == "__main__":
 	parser.add_argument('--mock', '-m', action='store_true', help='use mock backend, instead of serial')
 	parser.add_argument('--device', '-D', default='/dev/ttyS0', help='set device name')
 	parser.add_argument('--file', '-f', help='file to automatically open on start')
+	parser.add_argument('--control', '-c', help='mouse device to use as control device')
 
 	args = parser.parse_args()
 	log = Chat.ChatLog()
@@ -32,6 +33,12 @@ if __name__ == "__main__":
 
 	if args.file:
 		mainwin.importGCodeFromFile(args.file)
+
+	if args.control:
+		fd = os.open(args.control, os.O_RDWR)
+		os.write(fd, "\xF3\xC8\xF3\x64\xF3\x50") # enable wheel mode
+		notifier = QtCore.QSocketNotifier(fd, QtCore.QSocketNotifier.Read)
+		notifier.activated.connect(mainwin.readControlEvent)
 
 	sys.exit(app.exec_())
 

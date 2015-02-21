@@ -1,4 +1,5 @@
 from PySide import QtGui, QtCore
+import os, struct, time
 
 class ControlMainWindow(QtGui.QMainWindow):
 	_storeButtonUsed = False
@@ -8,6 +9,7 @@ class ControlMainWindow(QtGui.QMainWindow):
 	_workpiecePos = [ 5, 5, 5 ]
 	_originOffset = [ 0, 0 ]
 	_polarCorrection = [ 1, 0 ]
+	_debounce = None
 
 	def __init__(self, chatBackend):
 		super(ControlMainWindow, self).__init__(None)
@@ -327,6 +329,40 @@ class ControlMainWindow(QtGui.QMainWindow):
 			self._machine.action().manualMove(axis, positive, 10000, fast)
 		elif self._ui.drive100mm.isChecked():
 			self._machine.action().manualMove(axis, positive, 100000, fast)
+
+	@QtCore.Slot(int)
+	def readControlEvent(self, fd):
+		ev = os.read(fd, 4)
+		if len(ev) != 4: return
+
+		button, x, y, z = struct.unpack('bbbb', ev)
+		print 'control event: button=%d, x=%d, y=%d, z=%d; time=%f' % (button, x, y, z, time.time())
+
+		if self._debounce != None and time.time() - self._debounce < .1:
+			if x != self._debounceX or y != self._debounceY:
+				print 'discarding event, bounce detected'
+				return
+
+			if x == -1:
+				self.manualMove('X', False)
+			elif x == 1:
+				self.manualMove('X', True)
+
+			if y == -1:
+				self.manualMove('Y', False)
+			elif y == 1:
+				self.manualMove('Y', True)
+
+			self._debounce = None
+		else:
+			self._debounce = time.time()
+			self._debounceX = x
+			self._debounceY = y
+
+		if z == -1:
+			self.manualMove('Z', False)
+		elif z == 1:
+			self.manualMove('Z', True)
 
 from Converters import GCode
 from Control.MachineStatus import *
