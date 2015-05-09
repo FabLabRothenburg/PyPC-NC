@@ -23,7 +23,8 @@ if __name__ == "__main__":
 		cb = Chat.Backends.ChatBackendSerial(log, args.device)
 
 	translator = QtCore.QTranslator()
-	translator.load('i18n/' + QtCore.QLocale.system().name())
+	mydir = os.path.dirname(os.path.realpath(__file__))
+	translator.load(mydir + '/i18n/' + QtCore.QLocale.system().name())
 
 	app = QtGui.QApplication(sys.argv)
 	app.installTranslator(translator)
